@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Miguel Toro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,700;0,900;1,700;1,900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- Custom cursor -->
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-follower" id="cursorFollower"></div>
+
+  <!-- Navbar -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-logo">
+      <span class="nav-star">✦</span>
+      <span class="nav-name">Miguel Toro</span>
+    </div>
+    <div class="nav-links">
+      <a href="#about" class="nav-link">Sobre mí</a>
+      <a href="#proyectos" class="nav-link">Proyectos</a>
+      <a href="#contacto" class="nav-link">Contacto</a>
+    </div>
+    <div class="nav-socials">
+      <a href="https://www.instagram.com/justmibu/?hl=es" target="_blank" rel="noopener" class="social-pill">IG</a>
+      <a href="https://x.com/mibullfire" target="_blank" rel="noopener" class="social-pill">X</a>
+      <a href="https://github.com/mibullfire" target="_blank" rel="noopener" class="social-pill">GH</a>
+    </div>
+    <button class="nav-toggle" id="navToggle">
+      <span></span><span></span>
+    </button>
+  </nav>
+
+  <!-- Mobile menu -->
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="#about" class="mobile-link">Sobre mí</a>
+    <a href="#proyectos" class="mobile-link">Proyectos</a>
+    <a href="#contacto" class="mobile-link">Contacto</a>
+  </div>
+
+  <!-- Hero Section -->
+  <section class="hero" id="hero">
+    <div class="hero-grid">
+      <!-- Left: image -->
+      <div class="hero-image-wrap">
+        <div class="hero-image-container">
+          <div class="floating-badge badge-1">✦ mibullfire</div>
+          <div class="floating-badge badge-2">Alicia</div>
+          <div class="floating-badge badge-3">Tsubaki</div>
+          <img
+            src="img/profile.jpg"
+            alt="Miguel Toro"
+            class="hero-img"
+            id="heroImg"
+          />
+          <div class="image-glow"></div>
+        </div>
+      </div>
+
+      <!-- Right: text + links -->
+      <div class="hero-content">
+        <div class="hero-tag reveal-tag">23 ✦</div>
+        <h1 class="hero-title">
+          <span class="hero-name" id="heroName">Miguel Toro</span>
+          <span class="hero-sub">Ingeniero de Computadores,<br />fotografo y desarrollador web!</span>
+        </h1>
+
+        <div class="hero-links">
+          <a href="https://github.com/mibullfire" target="_blank" rel="noopener" class="hero-link-row">
+            <span class="link-label">GitHub</span>
+            <span class="link-btn">Ver perfil ↗</span>
+          </a>
+          <a href="https://www.instagram.com/justmibu/?hl=es" target="_blank" rel="noopener" class="hero-link-row">
+            <span class="link-label">Instagram</span>
+            <span class="link-btn">Seguir ↗</span>
+          </a>
+          <a href="https://x.com/mibullfire" target="_blank" rel="noopener" class="hero-link-row">
+            <span class="link-label">X (Twitter)</span>
+            <span class="link-btn">Ver ↗</span>
+          </a>
+          <a href="https://open.spotify.com/user/michelbullfire?si=7fd9bd7d68094e21" target="_blank" rel="noopener" class="hero-link-row">
+            <span class="link-label">Spotify</span>
+            <span class="link-btn">Escuchar ↗</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Decorative large name -->
+    <div class="hero-deco-text" aria-hidden="true">
+      <span class="deco-marquee" id="decoName">mibullfire</span>
+    </div>
+
+    <!-- Scroll indicator -->
+    <div class="scroll-indicator">
+      <div class="scroll-line"></div>
+      <span>scroll</span>
+    </div>
+  </section>
+
+  <!-- Sobre mí -->
+  <section class="bio" id="about">
+    <div class="bio-inner">
+      <p class="section-label">— Sobre mí</p>
+      <h2 class="bio-title">Hola, soy <em>Miguel</em></h2>
+
+      <!-- PÁRRAFO 1: Escribe aquí una introducción personal -->
+      <p class="bio-p">
+         Soy un ingeniero de computadores de Jerez de la Frontera, apasionado por los cacharros y todo lo programable. Ahora he empezado a hacer páginas webs para desetresarme después de quemar un par de ESP32 (van 6 mínimo).
+      </p>
+
+      <!-- PÁRRAFO 2: Algo más sobre ti, tus intereses, proyectos... -->
+      <p class="bio-p">
+        <!-- Ejemplo: "Cuando no estoy delante del teclado probablemente esté con la cámara en la mano o jugando con Alicia y Tsubaki." -->
+         Aparte de lo típico del ingeniero... me alucina la fotografía y la naturaleza. Después de tantos ordenadores, no hay nada como un paseo por la playa o una buena rutita por la montaña jeje
+      </p>
+
+      <!-- PÁRRAFO 3: Opcional — lo que quieras añadir -->
+      <p class="bio-p">
+        <!-- Espacio libre para lo que quieras contar. -->
+      </p>
+
+      <div class="bio-chips">
+        <!-- Añade o quita etiquetas según te defina -->
+        <span class="chip">Código</span>
+        <span class="chip">Fotografía</span>
+        <span class="chip">Desarrollo web</span>
+        <span class="chip">Ingeniería</span>
+        <span class="chip">Cruzcampo</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Proyectos -->
+  <section class="proyectos" id="proyectos">
+    <div class="proyectos-inner">
+      <p class="section-label">— Proyectos</p>
+      <h2 class="proyectos-title">Lo que creo cuando me aburro o me dan cerveza :)</h2>
+
+      <div class="proyectos-grid">
+
+        <!-- PROYECTO 1 -->
+        <article class="proy-card">
+          <a href="https://aceh-website-proyect-production.up.railway.app/index.html" target="_blank" rel="noopener" class="proy-img-wrap">
+            <img src="img/proyecto1.jpg" alt="BEARN" class="proy-img" onerror="this.closest('.proy-img-wrap').classList.add('proy-img--placeholder')" />
+            <div class="proy-overlay"><span>Ver proyecto ↗</span></div>
+          </a>
+          <div class="proy-body">
+            <div class="proy-meta">
+              <span class="proy-tag">WEB</span>
+              <span class="proy-tag">ACEH</span>
+            </div>
+            <h3 class="proy-nombre">BEARN</h3>
+            <p class="proy-desc">
+              WEB para la asociación ACEH, que provee un catálogo de revistas y artículos, destinados a las humanidades.
+            </p>
+            <div class="proy-links">
+              <a href="https://aceh-website-proyect-production.up.railway.app/index.html" target="_blank" rel="noopener" class="proy-link proy-link--primary">Ver proyecto ↗</a>
+              <a href="https://github.com/mibullfire" target="_blank" rel="noopener" class="proy-link">GitHub ↗</a>
+            </div>
+          </div>
+        </article>
+
+        <!-- PROYECTO 2 -->
+        <article class="proy-card">
+          <a href="#" target="_blank" rel="noopener" class="proy-img-wrap">
+            <img src="img/proyecto2.jpg" alt="Proyecto 2" class="proy-img" onerror="this.closest('.proy-img-wrap').classList.add('proy-img--placeholder')" />
+            <div class="proy-overlay"><span>Ver proyecto ↗</span></div>
+          </a>
+          <div class="proy-body">
+            <div class="proy-meta">
+              <span class="proy-tag"><!-- Tecnología --></span>
+              <span class="proy-tag"><!-- Tecnología --></span>
+            </div>
+            <h3 class="proy-nombre"><!-- Nombre del proyecto --></h3>
+            <p class="proy-desc">
+              <!-- Descripción breve del proyecto. -->
+            </p>
+            <div class="proy-links">
+              <a href="#" class="proy-link proy-link--primary">Ver proyecto ↗</a>
+              <a href="https://github.com/mibullfire" target="_blank" rel="noopener" class="proy-link">GitHub ↗</a>
+            </div>
+          </div>
+        </article>
+
+        <!-- PROYECTO 3 -->
+        <article class="proy-card">
+          <a href="#" target="_blank" rel="noopener" class="proy-img-wrap">
+            <img src="img/proyecto3.jpg" alt="Proyecto 3" class="proy-img" onerror="this.closest('.proy-img-wrap').classList.add('proy-img--placeholder')" />
+            <div class="proy-overlay"><span>Ver proyecto ↗</span></div>
+          </a>
+          <div class="proy-body">
+            <div class="proy-meta">
+              <span class="proy-tag"><!-- Tecnología --></span>
+              <span class="proy-tag"><!-- Tecnología --></span>
+            </div>
+            <h3 class="proy-nombre"><!-- Nombre del proyecto --></h3>
+            <p class="proy-desc">
+              <!-- Descripción breve del proyecto. -->
+            </p>
+            <div class="proy-links">
+              <a href="#" class="proy-link proy-link--primary">Ver proyecto ↗</a>
+              <a href="https://github.com/mibullfire" target="_blank" rel="noopener" class="proy-link">GitHub ↗</a>
+            </div>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Contacto -->
+  <section class="contacto" id="contacto">
+    <div class="contacto-inner">
+      <p class="section-label">— Contacto</p>
+      <h2 class="contacto-title">Escríbeme</h2>
+      <p class="contacto-sub">
+        Si por lo que sea quieres contactarme para un proyecto que tengas en mente, para conocerme o lo que te apetezca... Aquí tienes varios enlaces de mis redes y mi correo. Estaré encantado de responderte!
+      </p>
+      <div class="contacto-links">
+        <a href="https://www.instagram.com/justmibu/?hl=es" target="_blank" rel="noopener" class="contacto-link">Instagram ↗</a>
+        <a href="https://x.com/mibullfire" target="_blank" rel="noopener" class="contacto-link">X ↗</a>
+        <a href="https://github.com/mibullfire" target="_blank" rel="noopener" class="contacto-link">GitHub ↗</a>
+        <a href="mailto:hola@migueltoro.com" class="contacto-link">mibullfire@gmail.com ↗</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <span class="footer-name">✦ Miguel Toro</span>
+      <span class="footer-copy">© 2026 — Todos los derechos reservados</span>
+      <a href="#hero" class="footer-top">Volver arriba ↑</a>
+    </div>
+    <div class="footer-deco" aria-hidden="true">mibullfire</div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
