@@ -71,7 +71,7 @@ const decoName = document.getElementById('decoName');
 window.addEventListener('scroll', () => {
   const scrollY = window.scrollY;
   if (decoName) {
-    decoName.style.transform = `translateY(${scrollY * 0.08}px)`;
+    decoName.style.transform = `translateX(${scrollY * -0.15}px)`;
   }
 }, { passive: true });
 
