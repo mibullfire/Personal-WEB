@@ -829,4 +829,6 @@ body:has(button:hover) .cursor-follower {
   .navbar { padding: 1rem 1.5rem; }
   .footer-inner { flex-direction: column; text-align: center; }
   .proyectos-grid { grid-template-columns: 1fr; }
+  .hero-deco-text { display: none; }
+  .scroll-indicator { display: none; }
 }
