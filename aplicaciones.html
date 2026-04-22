@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aplicaciones — Miguel Toro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,700;0,900;1,700;1,900&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="img/web-icon.png" />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    a.proy-card { display: flex; flex-direction: column; }
+
+    .nav-link--active {
+      background: rgba(255,77,171,0.12) !important;
+      color: var(--accent) !important;
+    }
+
+    /* Page hero */
+    .page-hero {
+      min-height: 55vh;
+      padding: 10rem 2.5rem 5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .page-hero-inner { max-width: 700px; margin: 0 auto; }
+
+    .page-hero-title {
+      font-size: clamp(2.8rem, 7vw, 5.5rem);
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      line-height: 1.05;
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      transform: translateY(30px);
+      animation: fadeUp 0.8s 0.3s forwards;
+    }
+
+    .page-hero-title em {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .page-hero-sub {
+      font-size: 1.1rem;
+      color: var(--gray);
+      line-height: 1.7;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeUp 0.8s 0.5s forwards;
+    }
+
+    .page-hero-deco {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(5rem, 12vw, 13rem);
+      font-style: italic;
+      font-weight: 900;
+      color: transparent;
+      -webkit-text-stroke: 1px rgba(255,255,255,0.05);
+      white-space: nowrap;
+      letter-spacing: -0.02em;
+      text-align: center;
+      line-height: 1;
+      user-select: none;
+      pointer-events: none;
+    }
+
+    /* Apps section */
+    .apps-section {
+      padding: 4rem 2.5rem 8rem;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .apps-inner { max-width: 1100px; margin: 0 auto; }
+
+    .apps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.8rem;
+    }
+
+    /* App card icon area */
+    .app-icon-wrap {
+      height: 200px;
+      background: var(--dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .app-icon-wrap::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at center, rgba(255,77,171,0.07) 0%, transparent 65%);
+      pointer-events: none;
+    }
+
+    .app-icon {
+      font-family: 'JetBrains Mono', 'Courier New', monospace;
+      font-size: 3.5rem;
+      font-weight: 700;
+      color: var(--accent);
+      opacity: 0.75;
+      z-index: 1;
+      letter-spacing: -0.05em;
+      transition: opacity 0.4s, transform 0.4s;
+    }
+
+    .app-icon--clock {
+      font-family: 'Inter', sans-serif;
+      font-size: 4rem;
+      letter-spacing: 0;
+    }
+
+    .proy-card:hover .app-icon {
+      opacity: 1;
+      transform: scale(1.06);
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .page-hero { padding: 9rem 2rem 4rem; }
+    }
+
+    @media (max-width: 600px) {
+      .page-hero { padding: 8rem 1.5rem 3rem; min-height: auto; }
+      .apps-section { padding: 3rem 1.5rem 5rem; }
+      .apps-grid { grid-template-columns: 1fr; }
+      .page-hero-deco { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-follower" id="cursorFollower"></div>
+
+  <nav class="navbar" id="navbar">
+    <a href="index.html" class="nav-logo" style="text-decoration:none;color:inherit;">
+      <span class="nav-star">✦</span>
+      <span class="nav-name">Miguel Toro</span>
+    </a>
+    <div class="nav-links">
+      <a href="index.html#about" class="nav-link">Sobre mí</a>
+      <a href="index.html#proyectos" class="nav-link">Proyectos</a>
+      <a href="index.html#contacto" class="nav-link">Contacto</a>
+      <a href="aplicaciones.html" class="nav-link nav-link--active">Aplicaciones</a>
+    </div>
+    <div class="nav-socials">
+      <a href="https://www.instagram.com/justmibu/?hl=es" target="_blank" rel="noopener" class="social-pill">IG</a>
+      <a href="https://x.com/mibullfire" target="_blank" rel="noopener" class="social-pill">X</a>
+      <a href="https://github.com/mibullfire" target="_blank" rel="noopener" class="social-pill">GH</a>
+    </div>
+    <button class="nav-toggle" id="navToggle">
+      <span></span><span></span>
+    </button>
+  </nav>
+
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="index.html#about" class="mobile-link">Sobre mí</a>
+    <a href="index.html#proyectos" class="mobile-link">Proyectos</a>
+    <a href="index.html#contacto" class="mobile-link">Contacto</a>
+    <a href="aplicaciones.html" class="mobile-link" style="color:var(--accent)">Aplicaciones</a>
+  </div>
+
+  <!-- Page Hero -->
+  <section class="page-hero">
+    <div class="page-hero-inner">
+      <p class="section-label" style="opacity:0;animation:fadeUp 0.7s 0.1s forwards;">— Aplicaciones</p>
+      <h1 class="page-hero-title">Herramientas<br /><em>que construí</em></h1>
+      <p class="page-hero-sub">Mini-aplicaciones para el día a día. Código, tiempo y utilidades.</p>
+    </div>
+    <div class="page-hero-deco" aria-hidden="true">apps</div>
+  </section>
+
+  <!-- Apps Gallery -->
+  <section class="apps-section">
+    <div class="apps-inner">
+      <div class="apps-grid">
+
+        <!-- Portapapeles -->
+        <a href="apps/portapapeles.html" target="_blank" rel="noopener" class="proy-card">
+          <div class="app-icon-wrap">
+            <span class="app-icon">&lt;/&gt;</span>
+            <div class="proy-overlay"><span>Abrir app ↗</span></div>
+          </div>
+          <div class="proy-body">
+            <div class="proy-meta">
+              <span class="proy-tag">UTILIDAD</span>
+              <span class="proy-tag">CÓDIGO</span>
+            </div>
+            <h3 class="proy-nombre">Portapapeles de Código</h3>
+            <p class="proy-desc">
+              Comparte fragmentos de código con resaltado de sintaxis. Selecciona el lenguaje, pega tu código y obtén un enlace compartible al instante — sin backend, sin registro.
+            </p>
+            <div class="proy-links">
+              <span class="proy-link proy-link--primary">Abrir ↗</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- Reloj de Herramientas -->
+        <a href="apps/reloj.html" target="_blank" rel="noopener" class="proy-card">
+          <div class="app-icon-wrap">
+            <span class="app-icon app-icon--clock">◷</span>
+            <div class="proy-overlay"><span>Abrir app ↗</span></div>
+          </div>
+          <div class="proy-body">
+            <div class="proy-meta">
+              <span class="proy-tag">UTILIDAD</span>
+              <span class="proy-tag">TIEMPO</span>
+            </div>
+            <h3 class="proy-nombre">Reloj de Herramientas</h3>
+            <p class="proy-desc">
+              Cronómetro con registro de vueltas y cuenta atrás hasta una fecha y hora exacta. Dos herramientas en una sola pantalla.
+            </p>
+            <div class="proy-links">
+              <span class="proy-link proy-link--primary">Abrir ↗</span>
+            </div>
+          </div>
+        </a>
+
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <span class="footer-name">✦ Miguel Toro</span>
+      <span class="footer-copy">© 2026 — Todos los derechos reservados</span>
+      <a href="index.html" class="footer-top">Inicio ↑</a>
+    </div>
+    <div class="footer-deco" aria-hidden="true">apps</div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

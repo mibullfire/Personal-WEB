@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Portapapeles de Código — Miguel Toro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="../img/web-icon.png" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css" crossorigin="anonymous" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black: #0a0a0a;
+      --dark: #111111;
+      --dark2: #1a1a1a;
+      --white: #f5f5f5;
+      --white2: #e0e0e0;
+      --gray: #888;
+      --gray2: #444;
+      --accent: #ff4dab;
+      --accent2: #ff1a96;
+      --radius: 12px;
+      --radius-lg: 16px;
+      --mono: 'JetBrains Mono', 'Cascadia Code', 'Fira Code', 'Courier New', monospace;
+    }
+
+    html { scroll-behavior: smooth; font-size: 16px; }
+
+    body {
+      background: var(--black);
+      color: var(--white);
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+      cursor: none;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    a { text-decoration: none; color: inherit; }
+    button { cursor: none; font-family: inherit; }
+
+    /* ── Cursor ── */
+    .cursor {
+      width: 10px; height: 10px;
+      background: var(--accent);
+      border-radius: 50%;
+      position: fixed; top: 0; left: 0;
+      pointer-events: none; z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition: transform 0.1s, width 0.3s, height 0.3s;
+    }
+    .cursor-follower {
+      width: 36px; height: 36px;
+      border: 1.5px solid rgba(255,77,171,0.4);
+      border-radius: 50%;
+      position: fixed; top: 0; left: 0;
+      pointer-events: none; z-index: 9998;
+      transform: translate(-50%, -50%);
+      transition: transform 0.15s ease, width 0.3s, height 0.3s, border-color 0.3s;
+    }
+    body:has(a:hover) .cursor,
+    body:has(button:hover) .cursor { width: 16px; height: 16px; }
+    body:has(a:hover) .cursor-follower,
+    body:has(button:hover) .cursor-follower { width: 56px; height: 56px; border-color: rgba(255,77,171,0.8); }
+
+    /* ── Navbar ── */
+    .app-nav {
+      position: sticky;
+      top: 0; z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.1rem 2.5rem;
+      background: rgba(10,10,10,0.9);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .app-nav-logo {
+      display: flex; align-items: center; gap: 0.6rem;
+      font-weight: 700; font-size: 0.95rem;
+      letter-spacing: -0.02em;
+      color: var(--white);
+    }
+    .app-nav-star {
+      color: var(--accent);
+      animation: spin 8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .app-nav-back {
+      font-size: 0.82rem; font-weight: 600;
+      color: var(--gray);
+      padding: 0.45rem 1rem;
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 100px;
+      transition: color 0.3s, border-color 0.3s, background 0.3s;
+    }
+    .app-nav-back:hover {
+      color: var(--accent);
+      border-color: rgba(255,77,171,0.3);
+      background: rgba(255,77,171,0.05);
+    }
+
+    /* ── Main layout ── */
+    .paste-main {
+      flex: 1;
+      max-width: 860px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 3.5rem 2rem 5rem;
+    }
+
+    /* ── App header ── */
+    .paste-header { margin-bottom: 2.5rem; }
+    .paste-title-row {
+      display: flex; align-items: center; gap: 1rem;
+      margin-bottom: 0.6rem;
+    }
+    .paste-title-icon {
+      font-family: var(--mono);
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--accent);
+      background: rgba(255,77,171,0.08);
+      border: 1px solid rgba(255,77,171,0.2);
+      padding: 0.4rem 0.75rem;
+      border-radius: var(--radius);
+      letter-spacing: -0.03em;
+      white-space: nowrap;
+    }
+    .paste-title {
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 900;
+      letter-spacing: -0.04em;
+    }
+    .paste-subtitle { font-size: 0.95rem; color: var(--gray); margin-top: 0.3rem; }
+
+    /* ── Panel ── */
+    .paste-panel { display: flex; flex-direction: column; gap: 1.2rem; }
+
+    /* ── Toolbar ── */
+    .paste-toolbar {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap; gap: 0.8rem;
+    }
+    .toolbar-left { display: flex; align-items: center; gap: 0.8rem; }
+    .toolbar-label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--gray);
+    }
+
+    /* ── Language select ── */
+    .select-wrap { position: relative; }
+    .select-wrap::after {
+      content: '▾';
+      position: absolute; right: 0.9rem; top: 50%;
+      transform: translateY(-50%);
+      color: var(--gray); font-size: 0.7rem;
+      pointer-events: none;
+    }
+    .lang-select {
+      appearance: none;
+      background: var(--dark2);
+      color: var(--white2);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 100px;
+      padding: 0.45rem 2.2rem 0.45rem 1rem;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 500;
+      outline: none;
+      cursor: none;
+      transition: border-color 0.3s;
+    }
+    .lang-select:focus { border-color: rgba(255,77,171,0.4); }
+
+    /* ── Code textarea ── */
+    .code-input {
+      width: 100%;
+      min-height: 420px;
+      background: var(--dark);
+      color: #abb2bf;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: var(--radius-lg);
+      padding: 1.4rem 1.6rem;
+      font-family: var(--mono);
+      font-size: 0.9rem;
+      line-height: 1.7;
+      resize: vertical;
+      outline: none;
+      caret-color: var(--accent);
+      tab-size: 2;
+      transition: border-color 0.3s;
+      color-scheme: dark;
+    }
+    .code-input::placeholder { color: rgba(255,255,255,0.15); }
+    .code-input:focus { border-color: rgba(255,77,171,0.35); }
+
+    /* ── Actions row ── */
+    .paste-actions {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap; gap: 0.8rem;
+    }
+    .char-count {
+      font-size: 0.8rem;
+      color: var(--gray);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ── Buttons ── */
+    .btn-primary {
+      background: var(--accent);
+      color: var(--black);
+      border: none;
+      border-radius: 100px;
+      padding: 0.6rem 1.4rem;
+      font-size: 0.85rem;
+      font-weight: 700;
+      transition: background 0.3s, transform 0.2s;
+    }
+    .btn-primary:hover { background: var(--accent2); transform: translateY(-1px); }
+    .btn-primary:active { transform: translateY(0); }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--white2);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 100px;
+      padding: 0.55rem 1.2rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      transition: background 0.3s, border-color 0.3s, color 0.3s;
+    }
+    .btn-ghost:hover {
+      background: rgba(255,255,255,0.06);
+      border-color: rgba(255,255,255,0.2);
+      color: var(--white);
+    }
+
+    /* ── View mode ── */
+    .view-toolbar-actions { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+
+    .lang-badge {
+      font-size: 0.7rem; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      background: rgba(255,77,171,0.1);
+      border: 1px solid rgba(255,77,171,0.25);
+      color: var(--accent);
+      padding: 0.35rem 0.9rem;
+      border-radius: 100px;
+    }
+
+    /* ── Code display (highlight.js) ── */
+    .code-view-wrap {
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.07);
+      max-height: 600px;
+      overflow-y: auto;
+    }
+    .code-view-wrap::-webkit-scrollbar { width: 6px; height: 6px; }
+    .code-view-wrap::-webkit-scrollbar-track { background: transparent; }
+    .code-view-wrap::-webkit-scrollbar-thumb { background: var(--gray2); border-radius: 3px; }
+
+    pre.code-display { margin: 0; border-radius: 0; }
+    pre.code-display code.hljs {
+      background: #111111 !important;
+      font-family: var(--mono);
+      font-size: 0.9rem !important;
+      line-height: 1.7 !important;
+      padding: 1.5rem 1.6rem !important;
+      border-radius: 0 !important;
+    }
+
+    /* ── Share URL row ── */
+    .share-url-section { }
+    .share-url-label {
+      font-size: 0.78rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--gray); margin-bottom: 0.6rem;
+    }
+    .share-url-row { display: flex; gap: 0.6rem; align-items: center; }
+    .share-url-input {
+      flex: 1;
+      background: var(--dark2);
+      color: var(--gray);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 100px;
+      padding: 0.55rem 1.2rem;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      outline: none;
+      cursor: text;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color-scheme: dark;
+    }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed;
+      bottom: 2rem; left: 50%;
+      transform: translateX(-50%) translateY(16px);
+      background: var(--accent);
+      color: var(--black);
+      padding: 0.55rem 1.4rem;
+      border-radius: 100px;
+      font-size: 0.85rem; font-weight: 700;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 1000;
+      white-space: nowrap;
+      transition: opacity 0.25s, transform 0.25s;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ── Footer ── */
+    .app-footer {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      padding: 1.4rem 2.5rem;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      font-size: 0.8rem; color: var(--gray);
+    }
+    .app-footer a {
+      color: var(--gray);
+      font-weight: 600;
+      transition: color 0.3s;
+    }
+    .app-footer a:hover { color: var(--accent); }
+
+    /* ── Responsive ── */
+    @media (max-width: 600px) {
+      .app-nav { padding: 1rem 1.2rem; }
+      .paste-main { padding: 2.5rem 1.2rem 4rem; }
+      .paste-title-row { flex-wrap: wrap; }
+      .app-footer { flex-direction: column; gap: 0.5rem; text-align: center; padding: 1.2rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-follower" id="cursorFollower"></div>
+
+  <!-- Navbar -->
+  <nav class="app-nav">
+    <a href="../index.html" class="app-nav-logo">
+      <span class="app-nav-star">✦</span>
+      <span>Miguel Toro</span>
+    </a>
+    <a href="../aplicaciones.html" class="app-nav-back">← Aplicaciones</a>
+  </nav>
+
+  <!-- Main -->
+  <main class="paste-main">
+
+    <!-- Header -->
+    <div class="paste-header">
+      <div class="paste-title-row">
+        <span class="paste-title-icon">&lt;/&gt;</span>
+        <h1 class="paste-title">Portapapeles de Código</h1>
+      </div>
+      <p class="paste-subtitle">Pega tu código, elige el lenguaje y comparte el enlace al instante.</p>
+    </div>
+
+    <!-- EDIT MODE -->
+    <div id="editMode" class="paste-panel">
+      <div class="paste-toolbar">
+        <div class="toolbar-left">
+          <span class="toolbar-label">Lenguaje</span>
+          <div class="select-wrap">
+            <select id="langSelect" class="lang-select"></select>
+          </div>
+        </div>
+      </div>
+      <textarea id="codeInput" class="code-input" placeholder="Pega o escribe tu código aquí..." spellcheck="false" autocorrect="off" autocapitalize="off"></textarea>
+      <div class="paste-actions">
+        <span id="charCount" class="char-count">0 caracteres</span>
+        <button id="shareBtn" class="btn-primary">Crear enlace →</button>
+      </div>
+    </div>
+
+    <!-- VIEW MODE -->
+    <div id="viewMode" class="paste-panel" style="display:none">
+      <div class="paste-toolbar">
+        <div class="toolbar-left">
+          <span id="viewLangBadge" class="lang-badge">TEXTO</span>
+        </div>
+        <div class="view-toolbar-actions">
+          <button id="copyCodeBtn" class="btn-ghost">Copiar código</button>
+          <button id="newPasteBtn" class="btn-primary">Nuevo paste →</button>
+        </div>
+      </div>
+      <div class="code-view-wrap">
+        <pre class="code-display"><code id="codeDisplay"></code></pre>
+      </div>
+      <div class="share-url-section">
+        <p class="share-url-label">Enlace compartible</p>
+        <div class="share-url-row">
+          <input type="text" id="shareUrl" class="share-url-input" readonly />
+          <button id="copyUrlBtn" class="btn-ghost">Copiar URL</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <div id="toast" class="toast"></div>
+
+  <footer class="app-footer">
+    <span>✦ Portapapeles de Código</span>
+    <a href="../aplicaciones.html">← Todas las apps</a>
+  </footer>
+
+  <script>
+    /* ── Custom cursor ── */
+    const cur = document.getElementById('cursor');
+    const fol = document.getElementById('cursorFollower');
+    let mx = 0, my = 0, fx = 0, fy = 0;
+    document.addEventListener('mousemove', e => {
+      mx = e.clientX; my = e.clientY;
+      cur.style.left = mx + 'px'; cur.style.top = my + 'px';
+    });
+    (function loop() {
+      fx += (mx - fx) * 0.12; fy += (my - fy) * 0.12;
+      fol.style.left = fx + 'px'; fol.style.top = fy + 'px';
+      requestAnimationFrame(loop);
+    })();
+
+    /* ── Toast ── */
+    function showToast(msg, ms = 2400) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), ms);
+    }
+
+    /* ── Languages ── */
+    const LANGS = [
+      { id: 'plaintext', label: 'Texto plano' },
+      { id: 'javascript', label: 'JavaScript' },
+      { id: 'typescript', label: 'TypeScript' },
+      { id: 'python', label: 'Python' },
+      { id: 'html', label: 'HTML' },
+      { id: 'css', label: 'CSS' },
+      { id: 'json', label: 'JSON' },
+      { id: 'bash', label: 'Bash / Shell' },
+      { id: 'sql', label: 'SQL' },
+      { id: 'java', label: 'Java' },
+      { id: 'c', label: 'C' },
+      { id: 'cpp', label: 'C++' },
+      { id: 'csharp', label: 'C#' },
+      { id: 'rust', label: 'Rust' },
+      { id: 'go', label: 'Go' },
+      { id: 'php', label: 'PHP' },
+      { id: 'ruby', label: 'Ruby' },
+      { id: 'swift', label: 'Swift' },
+      { id: 'kotlin', label: 'Kotlin' },
+      { id: 'xml', label: 'XML' },
+      { id: 'yaml', label: 'YAML' },
+      { id: 'markdown', label: 'Markdown' },
+    ];
+
+    const sel = document.getElementById('langSelect');
+    LANGS.forEach(l => {
+      const o = document.createElement('option');
+      o.value = l.id; o.textContent = l.label;
+      sel.appendChild(o);
+    });
+
+    /* ── Encode / Decode (UTF-8 safe) ── */
+    function encode(text) {
+      const bytes = new TextEncoder().encode(text);
+      let bin = '';
+      bytes.forEach(b => bin += String.fromCharCode(b));
+      return btoa(bin);
+    }
+
+    function decode(b64) {
+      try {
+        const bin = atob(b64);
+        const bytes = new Uint8Array([...bin].map(c => c.charCodeAt(0)));
+        return new TextDecoder().decode(bytes);
+      } catch { return null; }
+    }
+
+    /* ── Parse hash ── */
+    function parseHash() {
+      const hash = location.hash.slice(1);
+      if (!hash) return null;
+      const idx = hash.indexOf(':');
+      if (idx === -1) return null;
+      const lang = hash.slice(0, idx);
+      const code = decode(hash.slice(idx + 1));
+      if (code === null) return null;
+      return { lang, code };
+    }
+
+    /* ── Mode switching ── */
+    const editMode = document.getElementById('editMode');
+    const viewMode = document.getElementById('viewMode');
+
+    function showEditMode() {
+      editMode.style.display = 'flex';
+      viewMode.style.display = 'none';
+    }
+
+    function showViewMode(lang, code) {
+      editMode.style.display = 'none';
+      viewMode.style.display = 'flex';
+
+      const label = LANGS.find(l => l.id === lang)?.label ?? lang;
+      document.getElementById('viewLangBadge').textContent = label.toUpperCase();
+
+      const codeEl = document.getElementById('codeDisplay');
+      codeEl.className = '';
+      codeEl.textContent = code;
+
+      if (lang !== 'plaintext' && hljs.getLanguage(lang)) {
+        codeEl.classList.add('language-' + lang);
+        hljs.highlightElement(codeEl);
+      }
+
+      const shareURL = location.href.split('#')[0] + '#' + lang + ':' + encode(code);
+      document.getElementById('shareUrl').value = shareURL;
+    }
+
+    /* ── Char count ── */
+    const codeInput = document.getElementById('codeInput');
+    const charCount = document.getElementById('charCount');
+    codeInput.addEventListener('input', () => {
+      const n = codeInput.value.length;
+      charCount.textContent = n.toLocaleString('es') + ' caracter' + (n === 1 ? '' : 'es');
+    });
+
+    /* ── Tab key support ── */
+    codeInput.addEventListener('keydown', e => {
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        const s = codeInput.selectionStart, en = codeInput.selectionEnd;
+        codeInput.value = codeInput.value.slice(0, s) + '  ' + codeInput.value.slice(en);
+        codeInput.selectionStart = codeInput.selectionEnd = s + 2;
+      }
+    });
+
+    /* ── Share button ── */
+    document.getElementById('shareBtn').addEventListener('click', () => {
+      const code = codeInput.value.trim();
+      if (!code) { showToast('Escribe algo primero 😅'); return; }
+      if (code.length > 60000) { showToast('El código es demasiado largo para un enlace.'); return; }
+      const lang = sel.value;
+      const encoded = encode(code);
+      history.replaceState(null, '', '#' + lang + ':' + encoded);
+      showViewMode(lang, code);
+      navigator.clipboard.writeText(location.href).then(() => {
+        showToast('¡Enlace copiado al portapapeles!');
+      }).catch(() => {
+        showToast('Enlace generado. Cópialo manualmente.');
+      });
+    });
+
+    /* ── Copy code ── */
+    document.getElementById('copyCodeBtn').addEventListener('click', () => {
+      const code = document.getElementById('codeDisplay').textContent;
+      navigator.clipboard.writeText(code).then(() => showToast('¡Código copiado!'));
+    });
+
+    /* ── Copy URL ── */
+    document.getElementById('copyUrlBtn').addEventListener('click', () => {
+      const url = document.getElementById('shareUrl').value;
+      navigator.clipboard.writeText(url).then(() => showToast('¡URL copiada!'));
+    });
+
+    /* ── New paste ── */
+    document.getElementById('newPasteBtn').addEventListener('click', () => {
+      history.replaceState(null, '', location.pathname);
+      codeInput.value = '';
+      charCount.textContent = '0 caracteres';
+      sel.value = 'plaintext';
+      showEditMode();
+    });
+
+    /* ── Init ── */
+    const parsed = parseHash();
+    if (parsed) {
+      sel.value = parsed.lang || 'plaintext';
+      showViewMode(parsed.lang, parsed.code);
+    } else {
+      showEditMode();
+    }
+
+    /* ── Page fade in ── */
+    document.body.style.opacity = '0';
+    document.body.style.transition = 'opacity 0.4s ease';
+    window.addEventListener('load', () => { document.body.style.opacity = '1'; });
+  </script>
+</body>
+</html>
