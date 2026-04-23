@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Yo Nunca — Miguel Toro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="../img/web-icon.png" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black: #0a0a0a;
+      --dark: #111111;
+      --dark2: #1a1a1a;
+      --dark3: #222222;
+      --white: #f5f5f5;
+      --white2: #e0e0e0;
+      --gray: #888;
+      --gray2: #444;
+      --accent: #ff4dab;
+      --accent2: #ff1a96;
+      --radius: 12px;
+      --radius-lg: 20px;
+    }
+
+    html { font-size: 16px; }
+
+    body {
+      background: var(--black);
+      color: var(--white);
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+      cursor: none;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    a { text-decoration: none; color: inherit; }
+    button { cursor: none; font-family: inherit; border: none; outline: none; }
+
+    /* ── Cursor ── */
+    .cursor {
+      width: 10px; height: 10px;
+      background: var(--accent); border-radius: 50%;
+      position: fixed; top: 0; left: 0;
+      pointer-events: none; z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition: width 0.3s, height 0.3s;
+    }
+    .cursor-follower {
+      width: 36px; height: 36px;
+      border: 1.5px solid rgba(255,77,171,0.4); border-radius: 50%;
+      position: fixed; top: 0; left: 0;
+      pointer-events: none; z-index: 9998;
+      transform: translate(-50%, -50%);
+      transition: transform 0.15s ease, width 0.3s, height 0.3s, border-color 0.3s;
+    }
+    body:has(button:hover) .cursor { width: 16px; height: 16px; }
+    body:has(button:hover) .cursor-follower { width: 56px; height: 56px; border-color: rgba(255,77,171,0.8); }
+    body:has(a:hover) .cursor { width: 16px; height: 16px; }
+    body:has(a:hover) .cursor-follower { width: 56px; height: 56px; border-color: rgba(255,77,171,0.8); }
+
+    /* ── Navbar ── */
+    .app-nav {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.1rem 2.5rem;
+      background: rgba(10,10,10,0.9);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .app-nav-logo { display: flex; align-items: center; gap: 0.6rem; font-weight: 700; font-size: 0.95rem; letter-spacing: -0.02em; }
+    .app-nav-star { color: var(--accent); animation: spin 8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .app-nav-back {
+      font-size: 0.82rem; font-weight: 600; color: var(--gray);
+      padding: 0.45rem 1rem;
+      border: 1px solid rgba(255,255,255,0.09); border-radius: 100px;
+      transition: color 0.3s, border-color 0.3s, background 0.3s;
+    }
+    .app-nav-back:hover { color: var(--accent); border-color: rgba(255,77,171,0.3); background: rgba(255,77,171,0.05); }
+
+    /* ── Layout ── */
+    .tool-main {
+      flex: 1;
+      max-width: 720px; width: 100%;
+      margin: 0 auto;
+      padding: 3rem 2rem 5rem;
+      display: flex; flex-direction: column; gap: 1.8rem;
+    }
+
+    /* ── Header ── */
+    .tool-title-row { display: flex; align-items: center; gap: 1rem; }
+    .tool-icon {
+      font-size: 1.8rem;
+      background: rgba(255,77,171,0.08);
+      border: 1px solid rgba(255,77,171,0.2);
+      padding: 0.3rem 0.65rem;
+      border-radius: var(--radius); line-height: 1.3;
+    }
+    .tool-title { font-size: clamp(1.6rem, 4vw, 2.4rem); font-weight: 900; letter-spacing: -0.04em; }
+    .tool-subtitle { font-size: 0.92rem; color: var(--gray); margin-top: 0.3rem; }
+
+    /* ── Progress ── */
+    .progress-row {
+      display: flex; align-items: center; gap: 1rem;
+    }
+    .progress-bar-wrap {
+      flex: 1;
+      height: 4px;
+      background: var(--dark2);
+      border-radius: 100px;
+      overflow: hidden;
+    }
+    .progress-bar {
+      height: 100%; background: var(--accent);
+      border-radius: 100px;
+      transition: width 0.5s ease;
+      width: 0%;
+    }
+    .progress-label {
+      font-size: 0.8rem; font-weight: 600; color: var(--gray);
+      white-space: nowrap; min-width: 60px; text-align: right;
+    }
+
+    /* ── Card ── */
+    .phrase-card {
+      min-height: 260px;
+      background: var(--dark);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: var(--radius-lg);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 2.5rem 2rem;
+      text-align: center;
+      position: relative; overflow: hidden;
+      gap: 1.2rem;
+    }
+    .phrase-card::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 50% 100%, rgba(255,77,171,0.07) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .phrase-number {
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--accent); opacity: 0.7;
+      z-index: 1;
+    }
+
+    .phrase-text {
+      font-size: clamp(1.1rem, 2.8vw, 1.5rem);
+      font-weight: 600;
+      line-height: 1.55;
+      letter-spacing: -0.01em;
+      color: var(--white);
+      z-index: 1;
+      transition: opacity 0.2s;
+    }
+    .phrase-text.fading { opacity: 0; transform: translateY(6px); }
+    .phrase-text { transition: opacity 0.25s, transform 0.25s; }
+
+    .phrase-empty {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: 1.2rem;
+      color: var(--gray2);
+      z-index: 1;
+    }
+
+    .phrase-done {
+      display: none;
+      flex-direction: column; align-items: center; gap: 0.5rem;
+      z-index: 1;
+    }
+    .phrase-done-title {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: clamp(1.6rem, 5vw, 2.4rem);
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .phrase-done-sub { font-size: 0.9rem; color: var(--gray); }
+
+    /* ── Buttons ── */
+    .btn-next {
+      background: var(--accent); color: var(--black);
+      border-radius: 100px;
+      padding: 1rem 2.5rem;
+      font-size: 1rem; font-weight: 800;
+      letter-spacing: -0.02em;
+      width: 100%;
+      transition: background 0.3s, transform 0.15s, box-shadow 0.3s;
+      box-shadow: 0 0 0 rgba(255,77,171,0);
+    }
+    .btn-next:hover { background: var(--accent2); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(255,77,171,0.25); }
+    .btn-next:active { transform: translateY(0); box-shadow: none; }
+    .btn-next:disabled { opacity: 0.35; pointer-events: none; }
+
+    .secondary-row { display: flex; gap: 0.8rem; }
+
+    .btn-secondary {
+      flex: 1;
+      background: transparent; color: var(--gray);
+      border: 1px solid rgba(255,255,255,0.09); border-radius: 100px;
+      padding: 0.6rem 1rem;
+      font-size: 0.83rem; font-weight: 600;
+      transition: color 0.3s, border-color 0.3s, background 0.3s;
+    }
+    .btn-secondary:hover { color: var(--white); border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.04); }
+    .btn-reset {
+      color: var(--accent);
+      border-color: rgba(255,77,171,0.2);
+    }
+    .btn-reset:hover { background: rgba(255,77,171,0.06); border-color: rgba(255,77,171,0.4); color: var(--accent); }
+
+    /* ── History ── */
+    .history-section { display: none; flex-direction: column; gap: 0.6rem; }
+    .history-section.visible { display: flex; }
+    .history-header {
+      font-size: 0.78rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.1em; color: var(--gray);
+    }
+    .history-list {
+      display: flex; flex-direction: column; gap: 0.35rem;
+      max-height: 260px; overflow-y: auto;
+      scrollbar-width: thin; scrollbar-color: var(--gray2) transparent;
+    }
+    .history-item {
+      display: flex; align-items: flex-start; gap: 0.7rem;
+      padding: 0.6rem 0.9rem;
+      background: var(--dark2);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: var(--radius);
+      font-size: 0.83rem; line-height: 1.45; color: var(--white2);
+      animation: histIn 0.2s ease;
+    }
+    @keyframes histIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+    .history-n { color: var(--accent); font-weight: 700; font-size: 0.72rem; min-width: 24px; padding-top: 1px; }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed; bottom: 2rem; left: 50%;
+      transform: translateX(-50%) translateY(16px);
+      background: var(--accent); color: var(--black);
+      padding: 0.55rem 1.4rem; border-radius: 100px;
+      font-size: 0.85rem; font-weight: 700;
+      opacity: 0; pointer-events: none; z-index: 1000;
+      white-space: nowrap; transition: opacity 0.25s, transform 0.25s;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ── Footer ── */
+    .app-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.4rem 2.5rem;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      font-size: 0.8rem; color: var(--gray);
+    }
+    .app-footer a { color: var(--gray); font-weight: 600; transition: color 0.3s; }
+    .app-footer a:hover { color: var(--accent); }
+
+    /* ── Responsive ── */
+    @media (max-width: 600px) {
+      .app-nav { padding: 1rem 1.2rem; }
+      .tool-main { padding: 2rem 1.2rem 4rem; }
+      .phrase-card { padding: 2rem 1.4rem; min-height: 220px; }
+      .app-footer { flex-direction: column; gap: 0.5rem; text-align: center; padding: 1.2rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-follower" id="cursorFollower"></div>
+
+  <nav class="app-nav">
+    <a href="../index.html" class="app-nav-logo">
+      <span class="app-nav-star">✦</span>
+      <span>Miguel Toro</span>
+    </a>
+    <a href="../aplicaciones.html" class="app-nav-back">← Aplicaciones</a>
+  </nav>
+
+  <main class="tool-main">
+
+    <div>
+      <div class="tool-title-row">
+        <span class="tool-icon">🃏</span>
+        <h1 class="tool-title">Yo Nunca</h1>
+      </div>
+      <p class="tool-subtitle">El que lo haya hecho, bebe. 350 frases sin repetición.</p>
+    </div>
+
+    <!-- Progress -->
+    <div class="progress-row">
+      <div class="progress-bar-wrap">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+      <span class="progress-label" id="progressLabel">0 / 350</span>
+    </div>
+
+    <!-- Card -->
+    <div class="phrase-card" id="phraseCard">
+      <p class="phrase-empty" id="phraseEmpty">Pulsa el botón para empezar</p>
+      <span class="phrase-number" id="phraseNumber" style="display:none"></span>
+      <p class="phrase-text" id="phraseText" style="display:none"></p>
+      <div class="phrase-done" id="phraseDone">
+        <p class="phrase-done-title">¡Habéis terminado!</p>
+        <p class="phrase-done-sub">350 frases completadas. Pulsa "Reiniciar" para volver a jugar.</p>
+      </div>
+    </div>
+
+    <!-- Main button -->
+    <button class="btn-next" id="btnNext">Siguiente frase</button>
+
+    <!-- Secondary actions -->
+    <div class="secondary-row">
+      <button class="btn-secondary" id="btnToggleHistory">Ver historial (0)</button>
+      <button class="btn-secondary btn-reset" id="btnReset">Reiniciar</button>
+    </div>
+
+    <!-- History -->
+    <div class="history-section" id="historySection">
+      <span class="history-header">Historial de frases</span>
+      <div class="history-list" id="historyList"></div>
+    </div>
+
+  </main>
+
+  <div id="toast" class="toast"></div>
+
+  <footer class="app-footer">
+    <span>✦ Yo Nunca</span>
+    <a href="../aplicaciones.html">← Todas las apps</a>
+  </footer>
+
+  <script>
+    /* ── Cursor ── */
+    const cur = document.getElementById('cursor');
+    const fol = document.getElementById('cursorFollower');
+    let mx = 0, my = 0, fx = 0, fy = 0;
+    document.addEventListener('mousemove', e => {
+      mx = e.clientX; my = e.clientY;
+      cur.style.left = mx + 'px'; cur.style.top = my + 'px';
+    });
+    (function loop() {
+      fx += (mx - fx) * 0.12; fy += (my - fy) * 0.12;
+      fol.style.left = fx + 'px'; fol.style.top = fy + 'px';
+      requestAnimationFrame(loop);
+    })();
+
+    /* ── Toast ── */
+    function showToast(msg, ms = 2200) {
+      const t = document.getElementById('toast');
+      t.textContent = msg; t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), ms);
+    }
+
+    /* ── Phrases ── */
+    const ALL_PHRASES = [
+      'Yo nunca lo he hecho sin haber querido.',
+      'Yo nunca lo he hecho con más de una persona en un mismo día.',
+      'Yo nunca he querido tirarme a la madre/padre de un amigo/a.',
+      'Yo nunca he querido tirarme al hermano/a de un amigo/a.',
+      'Yo nunca me he querido liar con alguien presente.',
+      'Yo nunca he tenido fantasías sexuales sobre alguien que no considerase atractivo/a.',
+      'Yo nunca lo he hecho a pelo.',
+      'Yo nunca he acabado en la boca de alguien / me han acabado en la boca.',
+      'Yo nunca he querido tirarme al novio/a de un amigo/a.',
+      'A mí nunca me han pedido que fuese más lento porque iba demasiado rápido.',
+      'Yo nunca he dejado con las ganas a alguien.',
+      'A mí nunca me han dejado con las ganas.',
+      'Yo nunca he tenido la típica discusión de "luces encendidas / apagadas".',
+      'Yo nunca me he encontrado un pelo en la boca tras hacer oral.',
+      'Yo nunca he puesto los cuernos.',
+      'A mí nunca me han puesto los cuernos.',
+      'Yo nunca he dudado de mi orientación sexual.',
+      'Yo nunca me he liado con dos personas de distinto sexo en una noche.',
+      'Yo nunca me he liado con alguien y me he arrepentido inmediatamente después.',
+      'Yo nunca he tenido sexo por pena.',
+      'Yo nunca me he tirado a mi ex.',
+      'A mí nunca me han pillado en el acto.',
+      'Yo nunca lo he hecho en un lugar público.',
+      'Yo nunca lo he hecho en la cama de una tercera persona.',
+      'Yo nunca lo he hecho con más gente alrededor.',
+      'Yo nunca he hecho un trío.',
+      'Yo nunca he tenido fantasías sexuales sobre hacer un trío con mi novio/a y otra persona.',
+      'Yo nunca me he masturbado con un objeto inanimado.',
+      'Yo nunca me he hecho daño a mí mismo al masturbarme.',
+      'Yo nunca me he decepcionado al liarme / tirarme a alguien con quien tenía muchas ganas.',
+      'Yo nunca he practicado sadomasoquismo o usado objetos relacionados.',
+      'Yo nunca he intentado anal pero no salió bien.',
+      'Yo nunca he practicado anal por placer.',
+      'Yo nunca me he liado / tirado a alguien que tenía mínimo 5 años más que yo.',
+      'Yo nunca he hecho algo sexual en el colegio / universidad.',
+      'A mí nunca me han hecho un chupetón en un lugar poco común.',
+      'Yo nunca he intentado emborrachar a alguien para liarme con esa persona.',
+      'Yo nunca he visto porno con otra persona.',
+      'Yo nunca me he grabado con alguien en la cama.',
+      'Yo nunca me he masturbado con una película que no fuese pornográfica.',
+      'Yo nunca he tenido un gatillazo.',
+      'Yo nunca lo he hecho con la regla.',
+      'Yo nunca me he querido liar con más de 2 personas presentes.',
+      'Yo nunca lo he hecho disfrazado para satisfacer algún morbo.',
+      'Yo nunca me he liado con el chico/a con quien estaba intentando ligar un amigo/a.',
+      'Yo nunca me lo he tragado.',
+      'Yo nunca me he excitado en un momento muy poco apropiado.',
+      'A mí nunca se me ha roto el condón.',
+      'Yo nunca he estado un año sin sexo tras haberlo hecho previamente.',
+      'Yo nunca he puesto / a mí nunca me han puesto un condón con la boca.',
+      'Yo nunca he involucrado comida en el sexo.',
+      'Yo nunca lo he hecho en una fiesta.',
+      'Yo nunca me he tomado / he comprado la pastilla del día después.',
+      'Yo nunca he tenido sexo por teléfono.',
+      'Yo nunca he tenido que correr a buscar mi ropa porque acababan de tocar el timbre de la casa.',
+      'Yo nunca he parado de liarme / tirarme a alguien para preguntarle a la persona cómo se llamaba.',
+      'Yo nunca me he liado / tirado a el/la ex de un amigo/a.',
+      'Yo nunca le he mentido sobre mis experiencias sexuales a mi nueva pareja.',
+      'Yo nunca he tenido que enseñar / a mí nunca me han tenido que enseñar cómo desabrochar un sujetador.',
+      'Yo nunca he tenido una fantasía sexual sobre un/a profesor/a.',
+      'Yo nunca he pillado a mis padres haciéndolo.',
+      'Yo nunca me he sacado fotos desnudo/a.',
+      'Yo nunca he llamado a alguien por un nombre equivocado mientras lo estábamos haciendo.',
+      'Yo nunca he / a mí nunca me han lamido el culo.',
+      'Yo nunca lo he hecho en la ducha.',
+      'Yo nunca he usado el Kamasutra para aprender o involucrar nuevas posiciones en la cama.',
+      'Yo nunca lo he hecho con alguien que era virgen.',
+      'Yo nunca he mentido sobre ser virgen.',
+      'Yo nunca me he medido el pene.',
+      'Yo nunca he borrado conversaciones subidas de tono para que mi pareja no me pillase.',
+      'Yo nunca me he liado / tirado a alguien que no me parecía atractivo/a solo porque estaba desesperado/a.',
+      'Yo nunca he creído haber contraído una enfermedad de transmisión sexual.',
+      'Yo nunca he fingido / exagerado un orgasmo.',
+      'Yo nunca he tenido un/a follamigo/a.',
+      'Yo nunca he salido de casa sin ropa interior.',
+      'Yo nunca me he liado / tirado a un/a extranjero/a.',
+      'Yo nunca he sentido envidia al ver los genitales de un amigo/a.',
+      'Yo nunca me he masturbado en casa de un amigo/a.',
+      'Yo nunca he hecho / a mí nunca me han hecho una mamada con condón.',
+      'Yo nunca he usado hielo en la cama.',
+      'Yo nunca he pedido que satisfacieran un fetiche mío pero sin éxito.',
+      'Yo nunca he intentado esconder una erección en público sin éxito.',
+      'A mí nunca me ha puesto la violencia en la cama.',
+      'Yo nunca me he tirado / se han tirado un pedo en el acto.',
+      'Yo nunca le he roto la ropa a mi pareja al quitársela.',
+      'Yo nunca he intentado / querido que una pareja rompiese.',
+      'Yo nunca he hecho / me han hecho una cubana.',
+      'Yo nunca me he masturbado viendo hentai.',
+      'Yo nunca he aceptado hacer algo por dinero.',
+      'Yo nunca he metido / me han metido más de 3 dedos.',
+      'Yo nunca lo he hecho en un coche y sonó la bocina.',
+      'A mí nunca me han tenido que enseñar una foto de con quién me había liado porque no me acordaba.',
+      'Yo nunca me he depilado los genitales pensando que iba a pinchar y acabé comiéndome los mocos.',
+      'Yo nunca he querido unirme a dos amigos que estuviesen haciéndolo.',
+      'Yo nunca he hecho una lista de todos los tíos / tías con los que me he liado.',
+      'Yo nunca he conseguido liarme o salir con alguien que era un amor platónico.',
+      'Yo nunca he tenido que usar más de 2 condones en una misma ronda.',
+      'Yo nunca lo he hecho en todos los cuartos de mi / su casa.',
+      'Yo nunca he pedido por Chatroulette / Omegle que me enseñen el pene / las tetas.',
+      'Yo nunca he tenido que usar páginas online o aplicaciones para ligar.',
+      'Yo nunca me he dado cuenta de que me estaban mirando mientras lo estaba haciendo.',
+      'Yo nunca me he liado con alguien presente.',
+      'Yo nunca me he liado / tirado a alguien que me cayera mal.',
+      'A mí nunca se me han / yo nunca he acabado encima del cuerpo.',
+      'A mí nunca me han dado una hostia por estar tirando la caña.',
+      'Yo nunca me he arrepentido de con quién había perdido la virginidad.',
+      'Yo nunca me he liado con alguien que acababa de vomitar.',
+      'A mí nunca me ha puesto alguien sin saber en su momento que esa persona tenía mínimo 4 años menos que yo.',
+      'Yo nunca he salido con alguien con quien sabía que no iba a estar mucho tiempo.',
+      'Yo nunca he hecho un 69.',
+      'Yo nunca lo he hecho con mis / sus padres cerca.',
+      'Yo nunca he ligado con alguien para poner celoso/a a una persona.',
+      'Yo nunca me he resbalado mientras lo hacía en la ducha.',
+      'Yo nunca le he dicho a alguien "te quiero" solo para follar.',
+      'Yo nunca he hecho / a mí nunca me han hecho sangrar al meter dedos.',
+      'Yo nunca he echado un polvo malísimo.',
+      'Yo nunca me he masturbado al menos 5 veces en un día.',
+      'Yo nunca he tenido un sueño mojado.',
+      'Yo nunca he pensado que el sexo oral era asqueroso.',
+      'Yo nunca he pensado que el sexo oral es mejor que la penetración.',
+      'Yo nunca he pensado en otra persona mientras estaba haciéndolo con alguien.',
+      'Yo nunca lo he hecho con alguien que en mi opinión tenía el pene pequeño.',
+      'Yo nunca he usado condones con sabores.',
+      'Yo nunca he / a mí nunca se me han acabado dentro sin condón.',
+      'Yo nunca me he guardado las fotos de mi ex desnudo/a después de haber cortado con él/ella.',
+      'Yo nunca he usado / nunca han usado conmigo la marcha atrás como método anticonceptivo.',
+      'Yo nunca me he liado con alguien que tenía novio/a.',
+      'A mí nunca me ha tirado la caña un familiar de mi novio/a.',
+      'Yo nunca he mandado a la friendzone a alguien tras haberme liado con esa persona.',
+      'Yo nunca me he alegrado por algo malo que le haya pasado a mi ex.',
+      'Yo nunca lo he hecho más de 5 veces en un día.',
+      'Yo nunca me he liado con alguien de mi actual clase.',
+      'A mí nunca me han hecho una cobra de verdad.',
+      'Yo nunca me he arrepentido de un tatuaje.',
+      'A mí nunca me ha dado más morbo hacerlo fuera de casa que dentro.',
+      'Yo nunca me he quedado dormido/a durante el sexo.',
+      'Yo nunca me he pillado por alguien mientras tenía novio/a.',
+      'Yo nunca he cortado con un novio/a porque el sexo no me satisfacía.',
+      'Yo nunca he roto la cama al hacerlo.',
+      'A mí nunca me han llamado la atención los vecinos por hacer demasiado ruido durante el sexo.',
+      'Yo nunca he / a mí nunca me han agarrado del pelo con fuerza en el sexo.',
+      'Yo nunca he aguantado menos de 10 minutos en la cama.',
+      'Nunca han aguantado menos de 10 minutos en la cama conmigo.',
+      'Yo nunca lo he hecho 3 o más veces seguidas.',
+      'Yo nunca he / a mí nunca me han despertado con una mamada / polvo.',
+      'Yo nunca me he masturbado mientras hacía una videollamada con alguien.',
+      'Yo nunca me he creado una cuenta falsa en alguna red social para ver lo que hacía un/a ex sin que se diera cuenta.',
+      'Yo nunca he conseguido liarme o salir con alguien con quien estaba previamente en la friendzone.',
+      'A mí nunca me han pillado un chupetón mis padres.',
+      'Yo nunca tendría una relación con alguien presente si se diese el caso.',
+      'Yo nunca he visto porno de hermanastros / padrastros / madrastras.',
+      'Yo nunca he / a mí nunca me han hecho garganta profunda.',
+      'Yo nunca me he sentido mal conmigo mismo tras tocarme.',
+      'Yo nunca le he seguido el rollo a un/a profesor/a que me estuviese tirando.',
+      'Yo nunca he pedido hacer un vídeo porno pero sin éxito.',
+      'Yo nunca he fingido ser de otra nacionalidad para ligar.',
+      'Yo nunca he tenido sexo interracial.',
+      'Yo nunca he estado frustrado porque no me satisfacía el sexo con una persona a quien quería.',
+      'Yo nunca me he masturbado en grupo.',
+      'Yo nunca me he obsesionado entera o parcialmente con alguien tras liarme con esa persona una vez.',
+      'Yo nunca he lamido unos pezones.',
+      'A mí nunca me han lamido los pezones.',
+      'Yo nunca he estado en la friendzone con alguien presente.',
+      'Yo nunca he cortado con alguien para salir con otra persona.',
+      'Nunca han cortado conmigo para salir con otra persona.',
+      'Yo nunca lo he hecho estando enfermo/a.',
+      'Yo nunca me he querido tirar / tirado a mi mejor amigo/a.',
+      'Yo nunca he preferido los culos a las tetas.',
+      'Yo nunca he tenido pique con el novio/a de mi ex.',
+      'Yo nunca he pensado que me casaría con un ex o actual pareja.',
+      'Yo nunca he soñado que me liaba / tiraba a alguien y me he decepcionado al despertarme.',
+      'Yo nunca me he liado con alguien que tenía muy mal aliento.',
+      'A mí nunca me han hecho daño al practicar sexo oral.',
+      'Yo nunca he tenido la paranoia de estar embarazada porque se me había retrasado la regla.',
+      'Yo nunca he / a mí nunca me han hecho una mamada conduciendo.',
+      'Yo nunca le he seguido el rollo a alguien que me estaba tirando solo para conseguir alcohol.',
+      'Yo nunca he visto un juguete sexual y he sentido intriga.',
+      'Yo nunca he tenido un sueño sexual sobre alguien presente / de la clase.',
+      'Yo nunca he sentido intriga por practicar sexo oral con alguien de mi mismo sexo.',
+      'Yo nunca he pensado que el sexo entre el mismo sexo es o sería mejor que el sexo entre distintos sexos.',
+      'Yo nunca he sentido atracción por algún familiar.',
+      'Yo nunca he chupado un pene / coño que supiera muy mal.',
+      'A mí nunca me ha interrumpido mi mascota mientras estaba haciéndolo.',
+      'Yo nunca me he / nunca se han equivocado de agujero.',
+      'Yo nunca me he masturbado justo antes de hacerlo para durar más.',
+      'Yo nunca he usado un vídeo porno como modelo a seguir.',
+      'Yo nunca me he vestido de cierta forma para atraer la atención de alguien y pasó de mí.',
+      'Yo nunca he alquilado una habitación de hotel o motel solo para follar.',
+      'Yo nunca haría un trío con gente aquí presente.',
+      'Yo nunca he jugado a algún juego con el castigo de hacer un striptease.',
+      'Yo nunca me he liado con alguien que besara realmente mal.',
+      'Yo nunca he usado el móvil mientras lo estaba haciendo.',
+      'Yo nunca lo he hecho manteniendo 0 contacto visual con la otra persona.',
+      'A mí nunca me ha tirado para atrás ver cuánto pelo púbico tenía la persona con la que lo iba a hacer.',
+      'Yo nunca me he reído mientras lo estaba haciendo.',
+      'Yo nunca he tirado la caña de broma y acabó saliendo mejor de lo que esperaba.',
+      'Yo nunca me he liado / tirado al mejor amigo/a de mi ex.',
+      'Yo nunca me he hecho fotos sensuales desnudo/a para enviárselas a alguien.',
+      'Yo nunca he creído que alguien presente me ha tirado la caña alguna vez.',
+      'Yo nunca me he liado con alguien que ha querido tener algo conmigo después sin que yo quisiera.',
+      'Yo nunca me he liado / tirado a alguien que no he vuelto a ver en mi vida.',
+      'Yo nunca me he imaginado cómo serían las tetas / el pene de alguien presente.',
+      'Yo nunca me habría tirado a alguien de clase a principio de curso pero ahora me da asco.',
+      'Yo nunca he hecho / provocado squirting.',
+      'Yo nunca he / a mí nunca me han ocasionado moratones o arañazos en el sexo.',
+      'Yo nunca he / a mí nunca me han dado un pollazo en la cara.',
+      'Yo nunca he / a mí nunca me han tirado la caña para conseguir alcohol.',
+      'Yo nunca lo he hecho con música de fondo.',
+      'Yo nunca me he liado / tirado a alguien que estaba muy por encima de mis posibilidades.',
+      'Yo nunca he tenido una cita de la que creía que podía surgir algo y acabé decepcionándome.',
+      'A mí nunca me han intentado emborrachar para liarse conmigo.',
+      'Yo nunca he mentido sobre mí mismo para ligar.',
+      'Yo nunca lo he hecho estando borracho / fumado.',
+      'Yo nunca le he robado condones a un familiar.',
+      'Yo nunca me he llevado condones pensando que iba a pinchar y acabé dándoselos a alguien.',
+      'Yo nunca he jugado a roles en la cama.',
+      'Yo nunca he usado saliva como lubricante.',
+      'Yo nunca me he liado 2 o más veces con alguien con quien no tenía nada.',
+      'Yo nunca he negado liarme con alguien pese a ser verdad.',
+      'Yo nunca he dormido en la misma cama con alguien del sexo opuesto sin que pasara nada.',
+      'Yo nunca me he liado con más de 10 personas en toda mi vida.',
+      'Yo nunca he chantajeado a alguien con contar un secreto suyo.',
+      'Yo nunca me he enterado de que le ponían los cuernos a un amigo/a y lo he ocultado por alguna razón.',
+      'Yo nunca he estado más de un mes sin masturbarme.',
+      'Yo nunca he pasado de los preliminares y he ido directo/a al sexo.',
+      'Yo nunca me he quedado en los preliminares porque no me apetecía el sexo.',
+      'Yo nunca he dejado un polvo a mitad por cualquier razón.',
+      'Yo nunca me he asustado al ver el tamaño del pene de alguien.',
+      'Yo nunca me he liado con alguien justo después de potar.',
+      'Yo nunca me he dado cuenta de que me estaban mirando mientras meaba.',
+      'Yo nunca he tenido arcadas al hacer oral.',
+      'A mí nunca me ha puesto alguien que no considerase atractivo/a.',
+      'Yo nunca he / a mí nunca me han hecho una mamada bajo el agua.',
+      'Yo nunca he rechazado a un/una ex que quería volver a liarse conmigo.',
+      'Yo nunca lo he hecho en otro país.',
+      'Yo nunca me he masturbado con una foto.',
+      'Yo nunca he pensado en una vieja o un animal mientras lo hacía para durar más.',
+      'Yo nunca he comprado algo en un sex shop.',
+      'Yo nunca le he hecho un baile sensual a mi pareja.',
+      'Yo nunca me he encarado con alguien que estuviese mirando o molestando a mi pareja.',
+      'A mí nunca me han retado a liarme con alguien.',
+      'Yo nunca me he masturbado pensando en alguien que no fuese mi pareja en ese momento.',
+      'Yo nunca me he liado / tirado a alguien a quien le tenía ganas mientras tenía novio/a.',
+      'Yo nunca lo he hecho sin quitarme la mayoría de la ropa.',
+      'Yo nunca he tenido un/una ex que se cambió de acera después de dejarlo conmigo.',
+      'Yo nunca le he hecho la cobra a alguien que me había rechazado previamente por venganza.',
+      'Yo nunca he puesto cachondo/a a alguien con un simple susurro al oído.',
+      'Yo nunca lo he hecho justo después de discutir para reconciliarnos.',
+      'Yo nunca volvería con un/una ex.',
+      'Yo nunca me volvería a liar con alguien presente.',
+      'Yo nunca lo he hecho en una sola posición todo el rato.',
+      'Yo nunca lo he hecho en alrededor de 10 posiciones.',
+      'Yo nunca he estado un mes sin hacerlo teniendo pareja.',
+      'Yo nunca he acabado encima de mi propio cuerpo sin querer.',
+      'A mí nunca me han puesto tanto que me han hecho temblar.',
+      'A mí nunca se me ha dormido una parte del cuerpo mientras lo hacía.',
+      'A mí nunca se me ha perdido algo dentro de alguien / de mí mismo/a.',
+      'Yo nunca he tenido que parar para preguntar si iba todo bien.',
+      'A mí nunca me han propuesto un trío seriamente.',
+      'Yo nunca he archivado un chat porque no quería que mi pareja lo viera pero tampoco quería borrarlo.',
+      'Yo nunca he negado masturbarme.',
+      'Yo nunca me he excitado / empalmado cuando me han perreado en una fiesta.',
+      'A mí nunca me han usado para poner celoso/a a alguien.',
+      'Yo nunca he estado en la cama con alguien del sexo opuesto pero solo hubo besos.',
+      'Yo nunca me he rascado los genitales en público y me han visto.',
+      'Yo nunca lo he hecho con los calcetines puestos.',
+      'Yo nunca me he negado a hacerle oral a alguien que me lo había pedido.',
+      'Yo nunca me he liado con un chico más bajito / una chica más alta que yo.',
+      'Yo nunca lo he hecho con gafas.',
+      'Yo nunca me he liado con alguien con quien no debería haberlo hecho por ir borracho/a.',
+      'Yo nunca he tenido complejo sobre alguna parte de mi cuerpo.',
+      'Yo nunca lo he hecho justo antes de dormirme y al despertarme.',
+      'A mí nunca me ha tirado la caña alguien pensando que era de otra orientación sexual.',
+      'Yo nunca he aceptado hacer / que me hicieran algo que no quería solo para follar.',
+      'Yo nunca he hecho que alguien hiciera algo que no quería con el sexo como recompensa.',
+      'Yo nunca he recibido fotos de alguien desnudo/a.',
+      'Yo nunca le he estado mirando las tetas a una chica y me ha pillado de pleno.',
+      'A mí nunca me ha puesto más hacerlo sin condón.',
+      'Yo nunca he acabado y he continuado sin parar.',
+      'Yo nunca he querido tirarme al hermano/a de mi pareja o de un/a ex.',
+      'Yo nunca he dejado una mancha en la ropa o en la cama.',
+      'Yo nunca he sido dominante en la cama.',
+      'Yo nunca me he masturbado en una ducha que no fuese la mía.',
+      'Yo nunca le he contado a alguien que había follado inmediatamente después de hacerlo.',
+      'Yo nunca lo he hecho en una bañera.',
+      'Yo nunca lo he hecho en el suelo.',
+      'A mí nunca me han visto haciendo cualquier cosa sexual en el cine.',
+      'Yo nunca he tenido sexo esta última semana.',
+      'Yo nunca me he masturbado hoy.',
+      'Yo nunca he sudado mucho / bastante durante el sexo.',
+      'Yo nunca he buscado consejos sexuales en internet.',
+      'A mí nunca me ha gustado más estar debajo que encima.',
+      'A mí nunca me ha gustado más estar encima que debajo.',
+      'Yo nunca he salido con alguien a quien no quería.',
+      'Yo nunca he tenido un amigo/a que se ha liado con mi ex.',
+      'A mí nunca me ha hecho una cobra alguien presente.',
+      'Yo nunca le he hecho una cobra a alguien presente.',
+      'Yo nunca me he masturbado en otro país.',
+      'Yo nunca me he liado con alguien solo porque un amigo/a me ayudó.',
+      'Yo nunca pensé que podría tener algo con alguien presente sin darme cuenta de que no le atraía para nada.',
+      'Yo nunca me he masturbado con amigos/as en casa.',
+      'Yo nunca me he masturbado pensando en alguien menor que yo.',
+      'Yo nunca he tonteado / ligado con alguien con quien no tenía ningún interés en quedar.',
+      'Yo nunca me he pillado por alguien con quien no podría tener nada por su orientación sexual.',
+      'Yo nunca he pensado que alguien presente podría ser una fiera en la cama.',
+      'Yo nunca he vuelto con un/una ex.',
+      'Yo nunca me he liado / he salido con alguien con quien había previamente negado que tendría algo jamás.',
+      'Yo nunca me he arrepentido de liarme con / pillarme por alguien presente.',
+      'Yo nunca me he puesto la ropa interior de alguien del sexo opuesto.',
+      'Yo nunca he acabado al mismo tiempo que la persona con quien lo estaba haciendo.',
+      'Yo nunca lo he hecho en una cama individual.',
+      'Yo nunca lo he hecho en un sofá.',
+      'Yo nunca he usado lubricante de sabores.',
+      'Yo nunca he dejado que alguien usara un juguete sexual conmigo.',
+      'A mí nunca me ha puesto hacer oral.',
+      'A mí nunca me ha oído haciéndolo un amigo/a.',
+      'Yo nunca he oído a un amigo/a haciéndolo.',
+      'Yo nunca he dejado manchas en la pared.',
+      'Yo nunca me he mirado en el espejo mientras lo estaba haciendo.',
+      'Yo nunca me he negado a hacerlo con mi pareja pese a que me lo suplicara.',
+      'Yo nunca les he contado a mis padres que perdí la virginidad.',
+      'Yo nunca he dicho que no podía ir a alguna quedada por quedarme follando.',
+      'Yo nunca me he puesto celoso/a al ver a mi pareja hablar con su ex.',
+      'Yo nunca he sido sumiso/a.',
+      'Yo nunca he pensado en operarme las tetas.',
+      'A mí nunca se me ha salido en pleno acto y me he hecho daño.',
+      'Yo nunca he hecho algo que previamente pensé que nunca haría.',
+      'Yo nunca he / a mí nunca me han hecho el hámster.',
+      'Yo nunca he perdido la virginidad con 15 años o menos.',
+      'Yo nunca he desvirgado a alguien menor de 16 años.',
+      'Yo nunca he rendido poco en algún deporte porque acababa de hacerlo.',
+      'Yo nunca me he puesto el condón al revés.',
+      'Yo nunca he usado lubricantes con efectos de calor o frío.',
+      'Yo nunca me he puesto un condón que me fuera incómodamente pequeño o apretado.',
+      'Yo nunca me he masturbado con un condón puesto.',
+      'Yo nunca lo he hecho con los ojos tapados por algo.',
+      'Yo nunca he perdido el equilibrio mientras lo hacía.',
+      'Yo nunca he pensado que alguien presente podría salir del armario.',
+      'Yo nunca estuve a punto de liarme con alguien hasta que otra persona me interrumpió.',
+      'Yo nunca he entrado en un puticlub.',
+      'Yo nunca he querido entrar en un puticlub pero por una razón u otra no lo hice.',
+      'Yo nunca he enviado / recibido fotos desnudas por accidente.',
+      'A mí nunca me ha puesto más hacerlo con los padres cerca.',
+      'Yo nunca he tenido que asegurarme de hacerlo en silencio para que no nos oyeran los padres.',
+      'Yo nunca lo he hecho en una posición que no me gustara solo porque mi pareja quería.',
+      'Yo nunca he sido incapaz de recrear una posición del Kamasutra.',
+      'Yo nunca me he liado / tirado o tenido algo con alguien para olvidarme de otra persona.',
+      'A mí nunca me ha tirado la caña un familiar de un amigo/a.',
+      'Yo nunca he pensado que, por ejemplo, [nombre] y [nombre] podrían liarse.',
+      'Yo nunca he mentido en este Yo Nunca.',
+    ];
+
+    const TOTAL = ALL_PHRASES.length;
+
+    /* ── State ── */
+    let remaining = [];
+    let played = [];
+    let historyVisible = false;
+
+    function init() {
+      remaining = [...Array(TOTAL).keys()];
+      shuffle(remaining);
+      played = [];
+      updateUI();
+      document.getElementById('phraseEmpty').style.display = 'block';
+      document.getElementById('phraseNumber').style.display = 'none';
+      document.getElementById('phraseText').style.display = 'none';
+      document.getElementById('phraseDone').style.display = 'none';
+      document.getElementById('btnNext').disabled = false;
+      renderHistory();
+    }
+
+    function shuffle(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+    }
+
+    function next() {
+      if (remaining.length === 0) return;
+
+      const idx = remaining.pop();
+      const entry = { idx, n: played.length + 1 };
+      played.push(entry);
+
+      const phraseText = document.getElementById('phraseText');
+      const phraseNumber = document.getElementById('phraseNumber');
+      const phraseEmpty = document.getElementById('phraseEmpty');
+      const phraseDone = document.getElementById('phraseDone');
+
+      phraseEmpty.style.display = 'none';
+      phraseDone.style.display = 'none';
+
+      phraseText.classList.add('fading');
+      setTimeout(() => {
+        phraseNumber.textContent = `Nº ${entry.n} de ${TOTAL}`;
+        phraseNumber.style.display = 'block';
+        phraseText.textContent = ALL_PHRASES[idx];
+        phraseText.style.display = 'block';
+        phraseText.classList.remove('fading');
+      }, 200);
+
+      if (remaining.length === 0) {
+        document.getElementById('btnNext').disabled = true;
+        setTimeout(() => {
+          phraseText.style.display = 'none';
+          phraseNumber.style.display = 'none';
+          phraseDone.style.display = 'flex';
+        }, 400);
+      }
+
+      updateUI();
+      if (historyVisible) renderHistory();
+    }
+
+    function updateUI() {
+      const done = played.length;
+      const pct = (done / TOTAL) * 100;
+      document.getElementById('progressBar').style.width = pct + '%';
+      document.getElementById('progressLabel').textContent = done + ' / ' + TOTAL;
+      document.getElementById('btnToggleHistory').textContent =
+        (historyVisible ? 'Ocultar historial' : 'Ver historial') + ' (' + done + ')';
+    }
+
+    function renderHistory() {
+      const list = document.getElementById('historyList');
+      if (played.length === 0) {
+        list.innerHTML = '<div style="color:var(--gray);font-size:0.83rem;padding:0.5rem 0.9rem;">Aún no se ha jugado ninguna frase.</div>';
+        return;
+      }
+      list.innerHTML = [...played].reverse().map(e =>
+        `<div class="history-item"><span class="history-n">${e.n}</span><span>${ALL_PHRASES[e.idx]}</span></div>`
+      ).join('');
+    }
+
+    /* ── Events ── */
+    document.getElementById('btnNext').addEventListener('click', next);
+
+    document.getElementById('btnToggleHistory').addEventListener('click', () => {
+      historyVisible = !historyVisible;
+      const sec = document.getElementById('historySection');
+      sec.classList.toggle('visible', historyVisible);
+      if (historyVisible) renderHistory();
+      updateUI();
+    });
+
+    document.getElementById('btnReset').addEventListener('click', () => {
+      init();
+      showToast('Historial limpiado. ¡A empezar de nuevo!');
+      if (historyVisible) renderHistory();
+    });
+
+    /* Spacebar to advance */
+    document.addEventListener('keydown', e => {
+      if (e.key === ' ' && !document.getElementById('btnNext').disabled) {
+        e.preventDefault(); next();
+      }
+    });
+
+    /* ── Start ── */
+    init();
+
+    /* ── Page fade ── */
+    document.body.style.opacity = '0';
+    document.body.style.transition = 'opacity 0.4s ease';
+    window.addEventListener('load', () => { document.body.style.opacity = '1'; });
+  </script>
+</body>
+</html>
