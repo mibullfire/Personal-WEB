@@ -335,7 +335,7 @@
         <span class="tool-icon">🎡</span>
         <h1 class="tool-title">Ruleta</h1>
       </div>
-      <p class="tool-subtitle">Escribe las opciones y gira para decidir.</p>
+      <p class="tool-subtitle">Escribe las opciones y pulsa en girar!</p>
     </div>
 
     <div class="tool-grid">
@@ -361,7 +361,7 @@
         <textarea
           id="itemsTextarea"
           class="items-textarea"
-          placeholder="Pedro&#10;María&#10;Juan&#10;Ana&#10;..."
+          placeholder="Elena&#10;Javier&#10;Laura&#10;Paco&#10;..."
           spellcheck="false"
         ></textarea>
 
@@ -645,7 +645,7 @@
 
     function updateMeta() {
       const n = segments.length;
-      document.getElementById('itemCount').innerHTML = `<span>${n}</span> opción${n !== 1 ? 'es' : ''}`;
+      document.getElementById('itemCount').innerHTML = `<span>${n}</span> opcion${n !== 1 ? 'es' : ''}`;
 
       const preview = document.getElementById('itemsPreview');
       preview.innerHTML = segments
