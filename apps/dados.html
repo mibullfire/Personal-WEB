@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dados — Miguel Toro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="../img/web-icon.png" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --black: #0a0a0a; --dark: #111111; --dark2: #1a1a1a; --dark3: #222;
+      --white: #f5f5f5; --white2: #e0e0e0; --gray: #888; --gray2: #444;
+      --accent: #ff4dab; --accent2: #ff1a96; --radius: 12px; --radius-lg: 16px;
+    }
+    html { font-size: 16px; }
+    body { background: var(--black); color: var(--white); font-family: 'Inter', sans-serif; overflow-x: hidden; cursor: none; min-height: 100vh; display: flex; flex-direction: column; }
+    a { text-decoration: none; color: inherit; }
+    button { cursor: none; font-family: inherit; border: none; outline: none; }
+
+    /* ── Cursor ── */
+    .cursor { width: 10px; height: 10px; background: var(--accent); border-radius: 50%; position: fixed; top: 0; left: 0; pointer-events: none; z-index: 9999; transform: translate(-50%,-50%); transition: width .3s, height .3s; }
+    .cursor-follower { width: 36px; height: 36px; border: 1.5px solid rgba(255,77,171,.4); border-radius: 50%; position: fixed; top: 0; left: 0; pointer-events: none; z-index: 9998; transform: translate(-50%,-50%); transition: transform .15s ease, width .3s, height .3s, border-color .3s; }
+    body:has(a:hover) .cursor, body:has(button:hover) .cursor { width: 16px; height: 16px; }
+    body:has(a:hover) .cursor-follower, body:has(button:hover) .cursor-follower { width: 56px; height: 56px; border-color: rgba(255,77,171,.8); }
+    @media (pointer: coarse) { body { cursor: auto; } button { cursor: auto; } .cursor, .cursor-follower { display: none; } }
+
+    /* ── Nav ── */
+    .app-nav { position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 1.1rem 2.5rem; background: rgba(10,10,10,.9); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,.06); }
+    .app-nav-logo { display: flex; align-items: center; gap: .6rem; font-weight: 700; font-size: .95rem; letter-spacing: -.02em; }
+    .app-nav-star { color: var(--accent); animation: spin 8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .app-nav-back { font-size: .82rem; font-weight: 600; color: var(--gray); padding: .45rem 1rem; border: 1px solid rgba(255,255,255,.09); border-radius: 100px; transition: color .3s, border-color .3s, background .3s; }
+    .app-nav-back:hover { color: var(--accent); border-color: rgba(255,77,171,.3); background: rgba(255,77,171,.05); }
+
+    /* ── Layout ── */
+    .tool-main { flex: 1; max-width: 700px; width: 100%; margin: 0 auto; padding: 3rem 2rem 5rem; display: flex; flex-direction: column; gap: 2rem; }
+    .tool-title-row { display: flex; align-items: center; gap: 1rem; margin-bottom: .4rem; }
+    .tool-icon { font-size: 1.8rem; background: rgba(255,77,171,.08); border: 1px solid rgba(255,77,171,.2); padding: .3rem .65rem; border-radius: var(--radius); line-height: 1.3; }
+    .tool-title { font-size: clamp(1.6rem,4vw,2.4rem); font-weight: 900; letter-spacing: -.04em; }
+    .tool-subtitle { font-size: .92rem; color: var(--gray); }
+
+    /* ── Controls ── */
+    .controls-row { display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-end; }
+    .ctrl-field { display: flex; flex-direction: column; gap: .5rem; }
+    .ctrl-label { font-size: .75rem; font-weight: 600; text-transform: uppercase; letter-spacing: .1em; color: var(--gray); }
+    .ctrl-select, .ctrl-input {
+      background: var(--dark2); color: var(--white2);
+      border: 1px solid rgba(255,255,255,.1); border-radius: var(--radius);
+      padding: .65rem 1rem; font-size: .95rem; font-family: 'Inter', sans-serif;
+      outline: none; transition: border-color .3s; appearance: none; min-width: 120px;
+    }
+    .ctrl-select:focus, .ctrl-input:focus { border-color: rgba(255,77,171,.4); }
+    .ctrl-input { width: 90px; font-family: 'JetBrains Mono', monospace; font-weight: 700; -moz-appearance: textfield; }
+    .ctrl-input::-webkit-outer-spin-button, .ctrl-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+    /* ── Dice area ── */
+    .dice-area {
+      background: var(--dark); border: 1px solid rgba(255,255,255,.07);
+      border-radius: var(--radius-lg); padding: 2.5rem 1rem;
+      display: flex; flex-wrap: wrap; gap: 1.4rem;
+      align-items: center; justify-content: center;
+      min-height: 220px; position: relative; overflow: hidden;
+    }
+    .dice-area::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 50% 100%, rgba(255,77,171,.06) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .dice-empty { color: var(--gray2); font-size: 1rem; }
+
+    /* ── Die ── */
+    .die-wrap { perspective: 400px; }
+    .die {
+      width: 80px; height: 80px;
+      background: var(--dark3);
+      border: 2px solid rgba(255,255,255,.12);
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+      box-shadow: 0 6px 24px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.08);
+      transition: transform .15s;
+    }
+    .die.rolling {
+      animation: dieRoll .7s ease forwards;
+    }
+    @keyframes dieRoll {
+      0%   { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1); }
+      20%  { transform: rotateX(180deg) rotateY(90deg) rotateZ(45deg) scale(.85); }
+      45%  { transform: rotateX(270deg) rotateY(180deg) rotateZ(90deg) scale(1.1); }
+      70%  { transform: rotateX(360deg) rotateY(270deg) rotateZ(135deg) scale(.9); }
+      100% { transform: rotateX(360deg) rotateY(360deg) rotateZ(0deg) scale(1); }
+    }
+    .die-face {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: clamp(1.5rem, 4vw, 2rem); font-weight: 700;
+      color: var(--white); line-height: 1;
+    }
+    .die-type-label {
+      position: absolute; bottom: -1.3rem; left: 50%; transform: translateX(-50%);
+      font-size: .65rem; font-weight: 600; color: var(--accent); letter-spacing: .06em;
+      white-space: nowrap;
+    }
+    .die.max .die-face { color: var(--accent); }
+    .die.min .die-face { color: var(--gray); }
+
+    /* Dot layout for d6 */
+    .die.d6 .die-face { display: none; }
+    .die.d6 .die-dots { display: grid; width: 60%; height: 60%; }
+    .dot {
+      width: 8px; height: 8px; background: var(--white2);
+      border-radius: 50%; justify-self: center; align-self: center;
+    }
+    .die.d6.max .dot { background: var(--accent); }
+    .die.d6.min .dot { background: var(--gray); }
+
+    /* Dot grids per face */
+    .dots-1 { grid-template: 1fr / 1fr; }
+    .dots-2 { grid-template: 1fr 1fr / 1fr; }
+    .dots-3 { grid-template: 1fr 1fr 1fr / 1fr; }
+    .dots-4 { grid-template: 1fr 1fr / 1fr 1fr; }
+    .dots-5 { grid-template: 1fr 1fr 1fr / 1fr 1fr; }
+    .dots-6 { grid-template: 1fr 1fr 1fr / 1fr 1fr; }
+
+    /* ── Result row ── */
+    .result-row {
+      display: flex; align-items: baseline; justify-content: center;
+      gap: .6rem; flex-wrap: wrap; min-height: 2.4rem;
+    }
+    .result-total {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: clamp(2rem, 7vw, 3.5rem); font-weight: 700;
+      letter-spacing: -.04em; color: var(--white);
+      transition: color .3s;
+      animation: popIn .35s cubic-bezier(.34,1.56,.64,1);
+    }
+    @keyframes popIn { from { transform: scale(.7); opacity: .3; } to { transform: scale(1); opacity: 1; } }
+    .result-label { font-size: .85rem; color: var(--gray); }
+    .result-formula { font-size: .82rem; font-family: 'JetBrains Mono', monospace; color: var(--gray2); }
+
+    /* ── Buttons ── */
+    .btn-roll { background: var(--accent); color: var(--black); border-radius: 100px; padding: 1rem 2.5rem; font-size: 1rem; font-weight: 800; letter-spacing: -.02em; width: 100%; transition: background .3s, transform .15s, box-shadow .3s; }
+    .btn-roll:hover { background: var(--accent2); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(255,77,171,.25); }
+    .btn-roll:active { transform: translateY(0); }
+    .btn-roll:disabled { opacity: .4; pointer-events: none; }
+
+    /* ── History ── */
+    .history-section { display: none; flex-direction: column; gap: .6rem; }
+    .history-section.visible { display: flex; }
+    .history-header { display: flex; align-items: center; justify-content: space-between; }
+    .history-label { font-size: .75rem; font-weight: 600; text-transform: uppercase; letter-spacing: .1em; color: var(--gray); }
+    .btn-clear { background: none; color: var(--gray); font-size: .73rem; font-weight: 600; padding: .2rem .55rem; border: 1px solid rgba(255,255,255,.07); border-radius: 100px; transition: color .3s, border-color .3s; }
+    .btn-clear:hover { color: var(--accent); border-color: rgba(255,77,171,.3); }
+    .history-list { display: flex; flex-wrap: wrap; gap: .4rem; }
+    .history-chip {
+      display: flex; align-items: center; gap: .35rem;
+      padding: .35rem .8rem;
+      background: var(--dark2); border: 1px solid rgba(255,255,255,.06);
+      border-radius: 100px; font-size: .82rem;
+      font-family: 'JetBrains Mono', monospace; color: var(--white2);
+      animation: chipIn .2s ease;
+    }
+    .history-chip:first-child { border-color: rgba(255,77,171,.3); color: var(--accent); }
+    @keyframes chipIn { from { opacity:0; transform: scale(.85); } to { opacity:1; transform: scale(1); } }
+
+    /* ── Toast ── */
+    .toast { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(16px); background: var(--accent); color: var(--black); padding: .55rem 1.4rem; border-radius: 100px; font-size: .85rem; font-weight: 700; opacity: 0; pointer-events: none; z-index: 1000; white-space: nowrap; transition: opacity .25s, transform .25s; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ── Footer ── */
+    .app-footer { display: flex; align-items: center; justify-content: space-between; padding: 1.4rem 2.5rem; border-top: 1px solid rgba(255,255,255,.06); font-size: .8rem; color: var(--gray); }
+    .app-footer a { color: var(--gray); font-weight: 600; transition: color .3s; }
+    .app-footer a:hover { color: var(--accent); }
+
+    @media (max-width: 600px) { .app-nav { padding: 1rem 1.2rem; } .tool-main { padding: 2rem 1.2rem 4rem; } .controls-row { flex-direction: column; } .ctrl-input, .ctrl-select { min-width: auto; width: 100%; } .app-footer { flex-direction: column; gap: .5rem; text-align: center; padding: 1.2rem; } .die { width: 68px; height: 68px; } }
+  </style>
+</head>
+<body>
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-follower" id="cursorFollower"></div>
+
+  <nav class="app-nav">
+    <a href="../index.html" class="app-nav-logo"><span class="app-nav-star">✦</span><span>Miguel Toro</span></a>
+    <a href="../aplicaciones.html" class="app-nav-back">← Aplicaciones</a>
+  </nav>
+
+  <main class="tool-main">
+    <div>
+      <div class="tool-title-row"><span class="tool-icon">🎲</span><h1 class="tool-title">Dados</h1></div>
+      <p class="tool-subtitle">Elige el tipo y la cantidad, y tira.</p>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls-row">
+      <div class="ctrl-field">
+        <span class="ctrl-label">Tipo de dado</span>
+        <select id="dieType" class="ctrl-select">
+          <option value="4">d4</option>
+          <option value="6" selected>d6</option>
+          <option value="8">d8</option>
+          <option value="10">d10</option>
+          <option value="12">d12</option>
+          <option value="20">d20</option>
+          <option value="100">d100</option>
+        </select>
+      </div>
+      <div class="ctrl-field">
+        <span class="ctrl-label">Cantidad</span>
+        <input type="number" id="dieCount" class="ctrl-input" value="1" min="1" max="10" />
+      </div>
+    </div>
+
+    <!-- Dice display -->
+    <div class="dice-area" id="diceArea">
+      <span class="dice-empty" id="diceEmpty">Pulsa tirar para lanzar los dados</span>
+    </div>
+
+    <!-- Result -->
+    <div class="result-row" id="resultRow" style="display:none">
+      <span class="result-total" id="resultTotal"></span>
+      <span class="result-label" id="resultLabel"></span>
+      <span class="result-formula" id="resultFormula"></span>
+    </div>
+
+    <!-- Roll button -->
+    <button class="btn-roll" id="btnRoll">Tirar</button>
+
+    <!-- History -->
+    <div class="history-section" id="historySection">
+      <div class="history-header">
+        <span class="history-label">Historial</span>
+        <button class="btn-clear" id="btnClear">Limpiar</button>
+      </div>
+      <div class="history-list" id="historyList"></div>
+    </div>
+  </main>
+
+  <div id="toast" class="toast"></div>
+
+  <footer class="app-footer">
+    <span>✦ Dados</span>
+    <a href="../aplicaciones.html">← Todas las apps</a>
+  </footer>
+
+  <script>
+    /* ── Cursor ── */
+    const cur = document.getElementById('cursor'), fol = document.getElementById('cursorFollower');
+    let mx=0,my=0,fx=0,fy=0;
+    document.addEventListener('mousemove', e => { mx=e.clientX; my=e.clientY; cur.style.left=mx+'px'; cur.style.top=my+'px'; });
+    (function loop(){ fx+=(mx-fx)*.12; fy+=(my-fy)*.12; fol.style.left=fx+'px'; fol.style.top=fy+'px'; requestAnimationFrame(loop); })();
+
+    function showToast(msg) { const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2000); }
+
+    /* ── Dot patterns for d6 ── */
+    const DOT_PATTERNS = {
+      1: [[true]],
+      2: [[true],[true]],
+      3: [[true],[true],[true]],
+      4: [[true,true],[true,true]],
+      5: [[true,true],[true,true],[true,false]],
+      6: [[true,true],[true,true],[true,true]],
+    };
+    // For 5, center dot needs special treatment
+    const D6_LAYOUTS = {
+      1: { cls:'dots-1', cells:[{r:0,c:0}] },
+      2: { cls:'dots-2', cells:[{r:0,c:0},{r:1,c:0}] },
+      3: { cls:'dots-3', cells:[{r:0,c:0},{r:1,c:0},{r:2,c:0}] },
+      4: { cls:'dots-4', cells:[{r:0,c:0},{r:0,c:1},{r:1,c:0},{r:1,c:1}] },
+      5: { cls:'dots-5', cells:[{r:0,c:0},{r:0,c:1},{r:1,c:0},{r:1,c:1},{r:2,c:0},{r:2,c:1}], center:true },
+      6: { cls:'dots-6', cells:[{r:0,c:0},{r:0,c:1},{r:1,c:0},{r:1,c:1},{r:2,c:0},{r:2,c:1}] },
+    };
+
+    function buildD6Dots(val) {
+      const layout = D6_LAYOUTS[val];
+      const grid = document.createElement('div');
+      grid.className = 'die-dots ' + layout.cls;
+      grid.style.display = 'grid';
+      if (val === 5) {
+        // 3 rows x 2 cols; center dot spans both cols
+        grid.style.gridTemplate = '1fr 1fr 1fr / 1fr 1fr';
+        const pos = [{r:0,c:0,span:false},{r:0,c:1,span:false},{r:1,c:0,span:true},{r:2,c:0,span:false},{r:2,c:1,span:false}];
+        pos.forEach(p => {
+          const d = document.createElement('div');
+          d.className = 'dot';
+          if (p.span) { d.style.gridColumn = '1 / 3'; d.style.justifySelf = 'center'; }
+          grid.appendChild(d);
+        });
+      } else {
+        layout.cells.forEach(() => {
+          const d = document.createElement('div');
+          d.className = 'dot';
+          grid.appendChild(d);
+        });
+      }
+      return grid;
+    }
+
+    /* ── State ── */
+    let rolling = false;
+    let history = [];
+
+    function roll() {
+      if (rolling) return;
+      const sides = parseInt(document.getElementById('dieType').value);
+      let count = parseInt(document.getElementById('dieCount').value);
+      if (isNaN(count) || count < 1) count = 1;
+      if (count > 10) count = 10;
+      document.getElementById('dieCount').value = count;
+
+      rolling = true;
+      document.getElementById('btnRoll').disabled = true;
+      document.getElementById('diceEmpty').style.display = 'none';
+      document.getElementById('resultRow').style.display = 'none';
+
+      const area = document.getElementById('diceArea');
+      area.innerHTML = '';
+
+      const results = Array.from({length: count}, () => Math.floor(Math.random() * sides) + 1);
+      const max = Math.max(...results), min = Math.min(...results);
+
+      results.forEach((val, i) => {
+        const wrap = document.createElement('div');
+        wrap.className = 'die-wrap';
+        const die = document.createElement('div');
+        die.className = `die${sides === 6 ? ' d6' : ''}`;
+        if (count > 1 && val === max) die.classList.add('max');
+        if (count > 1 && val === min) die.classList.add('min');
+
+        if (sides === 6) {
+          die.appendChild(buildD6Dots(val));
+        } else {
+          const face = document.createElement('span');
+          face.className = 'die-face';
+          face.textContent = val;
+          die.appendChild(face);
+        }
+
+        const lbl = document.createElement('span');
+        lbl.className = 'die-type-label';
+        lbl.textContent = 'd' + sides;
+        wrap.appendChild(die);
+        wrap.appendChild(lbl);
+        area.appendChild(wrap);
+
+        // Stagger roll animation
+        setTimeout(() => { die.classList.add('rolling'); }, i * 60);
+      });
+
+      const total = results.reduce((a,b) => a+b, 0);
+      const formula = results.join(' + ');
+
+      setTimeout(() => {
+        rolling = false;
+        document.getElementById('btnRoll').disabled = false;
+        const row = document.getElementById('resultRow');
+        row.style.display = 'flex';
+        const totalEl = document.getElementById('resultTotal');
+        totalEl.textContent = total;
+        totalEl.style.animation = 'none';
+        void totalEl.offsetWidth;
+        totalEl.style.animation = '';
+        document.getElementById('resultLabel').textContent = count > 1 ? `total de ${count}d${sides}` : `en 1d${sides}`;
+        document.getElementById('resultFormula').textContent = count > 1 ? `(${formula})` : '';
+
+        history.unshift({ total, formula: `${count}d${sides}`, vals: results.join(', ') });
+        if (history.length > 30) history.pop();
+        renderHistory();
+      }, 700 + (count - 1) * 60);
+    }
+
+    function renderHistory() {
+      if (history.length === 0) { document.getElementById('historySection').classList.remove('visible'); return; }
+      document.getElementById('historySection').classList.add('visible');
+      document.getElementById('historyList').innerHTML = history.map(h =>
+        `<span class="history-chip"><strong>${h.total}</strong> <span style="color:var(--gray);font-size:.72rem">${h.formula}</span></span>`
+      ).join('');
+    }
+
+    document.getElementById('btnRoll').addEventListener('click', roll);
+    document.getElementById('btnClear').addEventListener('click', () => { history = []; renderHistory(); });
+    document.addEventListener('keydown', e => { if (e.key === ' ' && document.activeElement.tagName !== 'INPUT') { e.preventDefault(); roll(); } });
+    document.getElementById('dieCount').addEventListener('keydown', e => { if (e.key === 'Enter') roll(); });
+
+    document.body.style.opacity = '0'; document.body.style.transition = 'opacity .4s ease';
+    window.addEventListener('load', () => { document.body.style.opacity = '1'; });
+  </script>
+</body>
+</html>

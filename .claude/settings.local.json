@@ -7,7 +7,10 @@
       "Bash(git -C \"C:\\\\Users\\\\mibul\\\\Desktop\\\\Personal-WEB\" push origin main)",
       "Bash(git add *)",
       "Bash(git commit -m ' *)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Read(//mnt/c/Users/mibul/Desktop/**)",
+      "Read(//mnt/c/Users/mibul/Desktop/Personal-WEB/**)",
+      "mcp__filesystem__directory_tree"
     ]
   }
 }

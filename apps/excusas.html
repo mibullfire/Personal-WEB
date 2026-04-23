@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Generador de Excusas — Miguel Toro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@1,700&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="../img/web-icon.png" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --black: #0a0a0a; --dark: #111111; --dark2: #1a1a1a;
+      --white: #f5f5f5; --white2: #e0e0e0; --gray: #888; --gray2: #444;
+      --accent: #ff4dab; --accent2: #ff1a96; --radius: 12px; --radius-lg: 20px;
+    }
+    html { font-size: 16px; }
+    body { background: var(--black); color: var(--white); font-family: 'Inter', sans-serif; overflow-x: hidden; cursor: none; min-height: 100vh; display: flex; flex-direction: column; }
+    a { text-decoration: none; color: inherit; }
+    button { cursor: none; font-family: inherit; border: none; outline: none; }
+
+    .cursor { width: 10px; height: 10px; background: var(--accent); border-radius: 50%; position: fixed; top: 0; left: 0; pointer-events: none; z-index: 9999; transform: translate(-50%,-50%); transition: width .3s, height .3s; }
+    .cursor-follower { width: 36px; height: 36px; border: 1.5px solid rgba(255,77,171,.4); border-radius: 50%; position: fixed; top: 0; left: 0; pointer-events: none; z-index: 9998; transform: translate(-50%,-50%); transition: transform .15s ease, width .3s, height .3s, border-color .3s; }
+    body:has(a:hover) .cursor, body:has(button:hover) .cursor { width: 16px; height: 16px; }
+    body:has(a:hover) .cursor-follower, body:has(button:hover) .cursor-follower { width: 56px; height: 56px; border-color: rgba(255,77,171,.8); }
+    @media (pointer: coarse) { body { cursor: auto; } button { cursor: auto; } .cursor, .cursor-follower { display: none; } }
+
+    .app-nav { position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 1.1rem 2.5rem; background: rgba(10,10,10,.9); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,.06); }
+    .app-nav-logo { display: flex; align-items: center; gap: .6rem; font-weight: 700; font-size: .95rem; letter-spacing: -.02em; }
+    .app-nav-star { color: var(--accent); animation: spin 8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .app-nav-back { font-size: .82rem; font-weight: 600; color: var(--gray); padding: .45rem 1rem; border: 1px solid rgba(255,255,255,.09); border-radius: 100px; transition: color .3s, border-color .3s, background .3s; }
+    .app-nav-back:hover { color: var(--accent); border-color: rgba(255,77,171,.3); background: rgba(255,77,171,.05); }
+
+    .tool-main { flex: 1; max-width: 640px; width: 100%; margin: 0 auto; padding: 3rem 2rem 5rem; display: flex; flex-direction: column; gap: 2rem; }
+    .tool-title-row { display: flex; align-items: center; gap: 1rem; margin-bottom: .4rem; }
+    .tool-icon { font-size: 1.8rem; background: rgba(255,77,171,.08); border: 1px solid rgba(255,77,171,.2); padding: .3rem .65rem; border-radius: var(--radius); line-height: 1.3; }
+    .tool-title { font-size: clamp(1.6rem,4vw,2.4rem); font-weight: 900; letter-spacing: -.04em; }
+    .tool-subtitle { font-size: .92rem; color: var(--gray); }
+
+    /* ── Category filter ── */
+    .cat-row { display: flex; flex-wrap: wrap; gap: .5rem; }
+    .cat-btn {
+      padding: .4rem 1rem; border-radius: 100px; font-size: .8rem; font-weight: 600;
+      background: var(--dark2); border: 1px solid rgba(255,255,255,.09); color: var(--gray);
+      transition: background .3s, color .3s, border-color .3s;
+    }
+    .cat-btn.active { background: var(--accent); border-color: var(--accent); color: var(--black); }
+    .cat-btn:not(.active):hover { color: var(--white); border-color: rgba(255,255,255,.2); }
+
+    /* ── Excuse card ── */
+    .excuse-card {
+      min-height: 240px;
+      background: var(--dark); border: 1px solid rgba(255,255,255,.07);
+      border-radius: var(--radius-lg);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 2.5rem 2rem; text-align: center; gap: 1rem;
+      position: relative; overflow: hidden;
+    }
+    .excuse-card::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 50% 100%, rgba(255,77,171,.07) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .excuse-cat-badge {
+      font-size: .68rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+      color: var(--accent); z-index: 1; display: none;
+    }
+    .excuse-cat-badge.show { display: block; }
+    .excuse-text {
+      font-size: clamp(1rem, 2.5vw, 1.35rem); font-weight: 600;
+      line-height: 1.6; letter-spacing: -.01em; color: var(--white);
+      z-index: 1;
+      transition: opacity .2s, transform .2s;
+    }
+    .excuse-text.fading { opacity: 0; transform: translateY(8px); }
+    .excuse-placeholder {
+      font-family: 'Playfair Display', serif; font-style: italic;
+      font-size: 1.1rem; color: var(--gray2); z-index: 1;
+    }
+    .excuse-placeholder.hidden { display: none; }
+
+    /* ── Credibility meter ── */
+    .cred-row { display: flex; align-items: center; gap: .8rem; z-index: 1; width: 100%; max-width: 320px; }
+    .cred-label { font-size: .72rem; font-weight: 600; color: var(--gray); white-space: nowrap; }
+    .cred-bar-wrap { flex: 1; height: 4px; background: var(--dark2); border-radius: 100px; overflow: hidden; }
+    .cred-bar { height: 100%; border-radius: 100px; transition: width .6s cubic-bezier(.25,.46,.45,.94), background .6s; }
+    .cred-value { font-size: .72rem; font-weight: 700; color: var(--accent); white-space: nowrap; min-width: 28px; text-align: right; }
+    .cred-row { display: none; }
+    .cred-row.show { display: flex; }
+
+    /* ── Buttons ── */
+    .btn-generate { background: var(--accent); color: var(--black); border-radius: 100px; padding: 1rem 2.5rem; font-size: 1rem; font-weight: 800; letter-spacing: -.02em; width: 100%; transition: background .3s, transform .15s, box-shadow .3s; }
+    .btn-generate:hover { background: var(--accent2); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(255,77,171,.25); }
+    .btn-generate:active { transform: translateY(0); }
+    .copy-row { display: flex; justify-content: center; }
+    .btn-copy { background: transparent; color: var(--gray); border: 1px solid rgba(255,255,255,.09); border-radius: 100px; padding: .5rem 1.2rem; font-size: .82rem; font-weight: 600; display: none; transition: color .3s, border-color .3s; }
+    .btn-copy.show { display: inline-flex; }
+    .btn-copy:hover { color: var(--white); border-color: rgba(255,255,255,.2); }
+
+    /* ── History ── */
+    .history-section { display: none; flex-direction: column; gap: .6rem; }
+    .history-section.visible { display: flex; }
+    .history-label { font-size: .75rem; font-weight: 600; text-transform: uppercase; letter-spacing: .1em; color: var(--gray); }
+    .history-list { display: flex; flex-direction: column; gap: .35rem; max-height: 220px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--gray2) transparent; }
+    .history-item { padding: .55rem .9rem; background: var(--dark2); border: 1px solid rgba(255,255,255,.05); border-radius: var(--radius); font-size: .83rem; color: var(--white2); line-height: 1.5; animation: histIn .2s ease; }
+    .history-item:first-child { border-color: rgba(255,77,171,.2); }
+    @keyframes histIn { from { opacity:0; transform: translateY(-4px); } to { opacity:1; transform: translateY(0); } }
+
+    .toast { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(16px); background: var(--accent); color: var(--black); padding: .55rem 1.4rem; border-radius: 100px; font-size: .85rem; font-weight: 700; opacity: 0; pointer-events: none; z-index: 1000; white-space: nowrap; transition: opacity .25s, transform .25s; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    .app-footer { display: flex; align-items: center; justify-content: space-between; padding: 1.4rem 2.5rem; border-top: 1px solid rgba(255,255,255,.06); font-size: .8rem; color: var(--gray); }
+    .app-footer a { color: var(--gray); font-weight: 600; transition: color .3s; }
+    .app-footer a:hover { color: var(--accent); }
+
+    @media (max-width: 600px) { .app-nav { padding: 1rem 1.2rem; } .tool-main { padding: 2rem 1.2rem 4rem; } .excuse-card { padding: 2rem 1.2rem; min-height: 200px; } .app-footer { flex-direction: column; gap: .5rem; text-align: center; padding: 1.2rem; } }
+  </style>
+</head>
+<body>
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-follower" id="cursorFollower"></div>
+
+  <nav class="app-nav">
+    <a href="../index.html" class="app-nav-logo"><span class="app-nav-star">✦</span><span>Miguel Toro</span></a>
+    <a href="../aplicaciones.html" class="app-nav-back">← Aplicaciones</a>
+  </nav>
+
+  <main class="tool-main">
+    <div>
+      <div class="tool-title-row"><span class="tool-icon">🤥</span><h1 class="tool-title">Excusas</h1></div>
+      <p class="tool-subtitle">Para cuando no quieres ir, pero tampoco quieres decirlo.</p>
+    </div>
+
+    <!-- Category filter -->
+    <div class="cat-row" id="catRow">
+      <button class="cat-btn active" data-cat="todas">Todas</button>
+      <button class="cat-btn" data-cat="trabajo">Trabajo</button>
+      <button class="cat-btn" data-cat="amigos">Amigos</button>
+      <button class="cat-btn" data-cat="familia">Familia</button>
+      <button class="cat-btn" data-cat="pareja">Pareja</button>
+      <button class="cat-btn" data-cat="salud">Salud</button>
+      <button class="cat-btn" data-cat="general">General</button>
+    </div>
+
+    <!-- Card -->
+    <div class="excuse-card" id="excuseCard">
+      <span class="excuse-cat-badge" id="excuseCatBadge"></span>
+      <p class="excuse-placeholder" id="excusePlaceholder">Pulsa el botón para generar tu excusa perfecta</p>
+      <p class="excuse-text" id="excuseText" style="display:none"></p>
+      <div class="cred-row" id="credRow">
+        <span class="cred-label">Credibilidad</span>
+        <div class="cred-bar-wrap"><div class="cred-bar" id="credBar"></div></div>
+        <span class="cred-value" id="credValue"></span>
+      </div>
+    </div>
+
+    <!-- Copy -->
+    <div class="copy-row">
+      <button class="btn-copy" id="btnCopy">📋 Copiar excusa</button>
+    </div>
+
+    <!-- Generate button -->
+    <button class="btn-generate" id="btnGenerate">Generar excusa</button>
+
+    <!-- History -->
+    <div class="history-section" id="historySection">
+      <span class="history-label">Excusas anteriores</span>
+      <div class="history-list" id="historyList"></div>
+    </div>
+  </main>
+
+  <div id="toast" class="toast"></div>
+
+  <footer class="app-footer">
+    <span>✦ Generador de Excusas</span>
+    <a href="../aplicaciones.html">← Todas las apps</a>
+  </footer>
+
+  <script>
+    const cur = document.getElementById('cursor'), fol = document.getElementById('cursorFollower');
+    let mx=0,my=0,fx=0,fy=0;
+    document.addEventListener('mousemove', e => { mx=e.clientX; my=e.clientY; cur.style.left=mx+'px'; cur.style.top=my+'px'; });
+    (function loop(){ fx+=(mx-fx)*.12; fy+=(my-fy)*.12; fol.style.left=fx+'px'; fol.style.top=fy+'px'; requestAnimationFrame(loop); })();
+
+    function showToast(msg) { const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2000); }
+
+    const EXCUSAS = [
+      // Trabajo
+      { cat:'trabajo', text:'Se me ha caído el portátil y hay que llevarlo al técnico, no tengo cómo trabajar.', cred:72 },
+      { cat:'trabajo', text:'Tengo una reunión de última hora con un cliente en la otra punta de la ciudad.', cred:85 },
+      { cat:'trabajo', text:'Hay una incidencia crítica en producción que solo yo puedo resolver.', cred:78 },
+      { cat:'trabajo', text:'Me han reasignado a otro proyecto urgente para esta semana.', cred:80 },
+      { cat:'trabajo', text:'El cliente ha adelantado la entrega y necesito la tarde para terminar.', cred:82 },
+      { cat:'trabajo', text:'Tengo una auditoría interna y me han pedido que esté disponible todo el día.', cred:75 },
+      { cat:'trabajo', text:'Se ha ido la luz en la oficina y nos han mandado a casa.', cred:68 },
+      { cat:'trabajo', text:'Tengo que cubrir a un compañero que está de baja y me ha tocado su turno.', cred:88 },
+      { cat:'trabajo', text:'El servidor de la empresa ha petado y estoy apagando fuegos desde casa.', cred:70 },
+      { cat:'trabajo', text:'Me han citado para una revisión de rendimiento a esa hora.', cred:76 },
+      // Amigos
+      { cat:'amigos', text:'Me ha surgido un compromiso de familia que no podía rechazar.', cred:74 },
+      { cat:'amigos', text:'Tengo un dolor de cabeza horrible, creo que me estoy resfriando.', cred:60 },
+      { cat:'amigos', text:'Se me ha estropeado el coche justo esta mañana.', cred:65 },
+      { cat:'amigos', text:'Me he quedado sin batería en el móvil y no me enteré de los mensajes.', cred:55 },
+      { cat:'amigos', text:'Mi piso tiene una pequeña inundación en el baño, estoy esperando al fontanero.', cred:72 },
+      { cat:'amigos', text:'Tengo que madrugar mañana para algo importante y necesito dormir pronto.', cred:63 },
+      { cat:'amigos', text:'Mi perro está raro, lo estoy vigilando por si hay que ir al veterinario.', cred:70 },
+      { cat:'amigos', text:'Me han liado con otra cosa y para cuando me di cuenta ya era tarde.', cred:50 },
+      { cat:'amigos', text:'Tengo visita en casa que no sabía que venía.', cred:69 },
+      { cat:'amigos', text:'Se me ha juntado con otro plan que había reservado con tiempo.', cred:72 },
+      // Familia
+      { cat:'familia', text:'Tengo un examen de recuperación que no me puedo permitir perder.', cred:85 },
+      { cat:'familia', text:'Me han llamado del médico para mañana y no quiero ir desvelado.', cred:78 },
+      { cat:'familia', text:'Tengo que hacer las compras de la semana, se nos ha acabado todo.', cred:60 },
+      { cat:'familia', text:'Vienen unos amigos de fuera a quedarse esta semana.', cred:74 },
+      { cat:'familia', text:'Me he apuntado a un curso online que empieza este finde.', cred:68 },
+      { cat:'familia', text:'Tengo que llevar a alguien al aeropuerto a una hora complicada.', cred:80 },
+      { cat:'familia', text:'El casero viene a ver el piso y necesito estar en casa.', cred:76 },
+      { cat:'familia', text:'Tengo una cita ineludible que no puedo cambiar.', cred:72 },
+      { cat:'familia', text:'Me ha surgido un tema burocrático urgente que tengo que resolver hoy.', cred:70 },
+      { cat:'familia', text:'Tengo una videollamada importante con alguien que está en otro huso horario.', cred:75 },
+      // Pareja
+      { cat:'pareja', text:'No me encuentro muy bien, creo que necesito un día tranquilo en casa.', cred:65 },
+      { cat:'pareja', text:'Me han surgido unas cosillas en el trabajo que no puedo dejar para después.', cred:70 },
+      { cat:'pareja', text:'Tengo que quedar con unos amigos que llevan semanas organizando algo.', cred:72 },
+      { cat:'pareja', text:'Estoy agotado/a esta semana, necesito recargar pilas el finde.', cred:68 },
+      { cat:'pareja', text:'Me ha llamado un familiar y tenemos que hablar de algo importante.', cred:74 },
+      { cat:'pareja', text:'Tenía ya un plan hecho de antes que se me había olvidado apuntar.', cred:60 },
+      { cat:'pareja', text:'El perro/gato se ha puesto malo y prefiero no dejarlo solo.', cred:72 },
+      { cat:'pareja', text:'Tengo que entregar algo mañana por la mañana y no he empezado.', cred:66 },
+      { cat:'pareja', text:'Me encuentro raro/a, quizás estoy empezando a enfermar.', cred:63 },
+      { cat:'pareja', text:'Esta semana me ha dejado muy cansado/a, lo dejamos para la semana que viene.', cred:60 },
+      // Salud
+      { cat:'salud', text:'Tengo cita con el especialista y llevan meses sin darme hueco.', cred:92 },
+      { cat:'salud', text:'Me duele mucho la espalda desde ayer, no puedo estar sentado/a mucho rato.', cred:70 },
+      { cat:'salud', text:'Creo que me ha dado alergia a algo, estoy con los ojos como tomates.', cred:68 },
+      { cat:'salud', text:'Llevo dos días con jaqueca, la luz y el ruido me matan.', cred:72 },
+      { cat:'salud', text:'Me han recetado un reposo relativo y me han dicho que no haga esfuerzos.', cred:85 },
+      { cat:'salud', text:'Estoy en cuarentena preventiva, me he cruzado con alguien que está malo.', cred:80 },
+      { cat:'salud', text:'Tengo el estómago fatal desde ayer, no sé si es algo que comí.', cred:68 },
+      { cat:'salud', text:'Me han subido la tensión y el médico me ha dicho que descanse.', cred:82 },
+      { cat:'salud', text:'Tengo una contractura en el cuello que no me deja girar la cabeza.', cred:66 },
+      { cat:'salud', text:'Estoy con vértigo desde esta mañana, no puedo moverme mucho.', cred:73 },
+      // General
+      { cat:'general', text:'Se me ha juntado todo esta semana, es una locura.', cred:55 },
+      { cat:'general', text:'Necesito un día para mí, llevas semanas sin parar.', cred:58 },
+      { cat:'general', text:'Me han surgido imprevistos que no tenía controlados.', cred:62 },
+      { cat:'general', text:'Tenía algo apuntado en el calendario y no lo había mirado bien.', cred:60 },
+      { cat:'general', text:'Estoy esperando una entrega importante y alguien tiene que estar en casa.', cred:74 },
+      { cat:'general', text:'Se me ha bloqueado el ordenador y estoy perdiendo datos, necesito solucionarlo.', cred:65 },
+      { cat:'general', text:'Tengo un trámite en el banco que solo se puede hacer en persona y en horario de mañana.', cred:78 },
+      { cat:'general', text:'Me ha surgido una oportunidad que no podía dejar escapar.', cred:60 },
+      { cat:'general', text:'Alguien me necesita y no puedo decir que no.', cred:63 },
+      { cat:'general', text:'La semana que viene te compenso, esta semana es imposible.', cred:50 },
+    ];
+
+    const CATS = { trabajo:'TRABAJO', amigos:'AMIGOS', familia:'FAMILIA', pareja:'PAREJA', salud:'SALUD', general:'GENERAL' };
+
+    let activeCat = 'todas';
+    let currentExcuse = null;
+    let historyArr = [];
+    let generating = false;
+
+    const excuseText = document.getElementById('excuseText');
+    const excusePlaceholder = document.getElementById('excusePlaceholder');
+    const excuseCatBadge = document.getElementById('excuseCatBadge');
+    const credRow = document.getElementById('credRow');
+    const credBar = document.getElementById('credBar');
+    const credValue = document.getElementById('credValue');
+    const btnCopy = document.getElementById('btnCopy');
+
+    document.querySelectorAll('.cat-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeCat = btn.dataset.cat;
+      });
+    });
+
+    function generate() {
+      if (generating) return;
+      generating = true;
+
+      const pool = activeCat === 'todas' ? EXCUSAS : EXCUSAS.filter(e => e.cat === activeCat);
+      if (pool.length === 0) { generating = false; return; }
+
+      let pick;
+      do { pick = pool[Math.floor(Math.random() * pool.length)]; }
+      while (pool.length > 1 && currentExcuse && pick.text === currentExcuse.text);
+
+      excuseText.classList.add('fading');
+      excusePlaceholder.classList.add('hidden');
+
+      setTimeout(() => {
+        currentExcuse = pick;
+
+        excusePlaceholder.style.display = 'none';
+        excuseText.style.display = 'block';
+        excuseText.textContent = pick.text;
+        excuseText.classList.remove('fading');
+
+        excuseCatBadge.textContent = CATS[pick.cat] || pick.cat.toUpperCase();
+        excuseCatBadge.classList.add('show');
+
+        // Credibility bar
+        credRow.classList.add('show');
+        const pct = pick.cred;
+        const color = pct >= 75 ? '#4ade80' : pct >= 55 ? '#f59e0b' : '#ef4444';
+        credBar.style.width = pct + '%';
+        credBar.style.background = color;
+        credValue.textContent = pct + '%';
+        credValue.style.color = color;
+
+        btnCopy.classList.add('show');
+
+        historyArr.unshift(pick.text);
+        if (historyArr.length > 10) historyArr.pop();
+        renderHistory();
+
+        generating = false;
+      }, 200);
+    }
+
+    function renderHistory() {
+      if (historyArr.length === 0) { document.getElementById('historySection').classList.remove('visible'); return; }
+      document.getElementById('historySection').classList.add('visible');
+      document.getElementById('historyList').innerHTML = historyArr.map(t =>
+        `<div class="history-item">${escHtml(t)}</div>`
+      ).join('');
+    }
+
+    function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+    document.getElementById('btnGenerate').addEventListener('click', generate);
+    document.addEventListener('keydown', e => { if (e.key === ' ' && document.activeElement.tagName !== 'INPUT') { e.preventDefault(); generate(); } });
+
+    btnCopy.addEventListener('click', () => {
+      if (!currentExcuse) return;
+      navigator.clipboard.writeText(currentExcuse.text)
+        .then(() => showToast('¡Excusa copiada al portapapeles!'))
+        .catch(() => showToast('No se pudo copiar.'));
+    });
+
+    document.body.style.opacity = '0'; document.body.style.transition = 'opacity .4s ease';
+    window.addEventListener('load', () => { document.body.style.opacity = '1'; });
+  </script>
+</body>
+</html>
