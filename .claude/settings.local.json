@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C \"C:\\\\Users\\\\mibul\\\\Desktop\\\\Personal-WEB\" add aplicaciones.html)",
+      "Bash(git -C \"C:\\\\Users\\\\mibul\\\\Desktop\\\\Personal-WEB\" diff --cached --stat)",
+      "Bash(git -C 'C:\\\\Users\\\\mibul\\\\Desktop\\\\Personal-WEB' commit -m ' *)",
+      "Bash(git -C \"C:\\\\Users\\\\mibul\\\\Desktop\\\\Personal-WEB\" push origin main)"
+    ]
+  }
+}
