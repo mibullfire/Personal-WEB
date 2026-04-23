@@ -65,6 +65,12 @@
     body:has(a:hover) .cursor-follower,
     body:has(button:hover) .cursor-follower { width: 56px; height: 56px; border-color: rgba(255,77,171,0.8); }
 
+    @media (pointer: coarse) {
+      body { cursor: auto; }
+      button { cursor: auto; }
+      .cursor, .cursor-follower { display: none; }
+    }
+
     /* ── Navbar ── */
     .app-nav {
       position: sticky; top: 0; z-index: 100;

@@ -71,6 +71,12 @@ body:has(button:hover) .cursor-follower {
   border-color: rgba(255,77,171,0.8);
 }
 
+@media (pointer: coarse) {
+  body { cursor: auto; }
+  button { cursor: auto; }
+  .cursor, .cursor-follower { display: none; }
+}
+
 /* ============================================
    NAVBAR
    ============================================ */
