@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mibullfire's blog ~ ✦</title>
+  <link rel="icon" type="image/png" href="img/web-icon.png" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Georgia:ital,wght@0,400;0,700;1,400&family=Verdana&display=swap');
+
+    /* ── Reset ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── Variables 2000s palette ── */
+    :root {
+      --bg:       #0d0020;
+      --bg2:      #130030;
+      --panel:    rgba(20, 0, 50, 0.85);
+      --border:   #7b2fff;
+      --border2:  #cc44ff;
+      --glow:     #b44dff;
+      --cyan:     #00ffee;
+      --lime:     #aaff00;
+      --pink:     #ff4dab;
+      --yellow:   #ffe566;
+      --white:    #f0e6ff;
+      --gray:     #9988bb;
+      --link:     #cc88ff;
+      --link-vis: #ff99cc;
+    }
+
+    /* ── Body / Star Background ── */
+    body {
+      background-color: var(--bg);
+      color: var(--white);
+      font-family: Verdana, Geneva, sans-serif;
+      font-size: 13px;
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Starfield canvas */
+    #stars-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ── Marquee banner ── */
+    .marquee-wrap {
+      position: relative;
+      z-index: 10;
+      background: linear-gradient(90deg, #1a004a, #2a006a, #1a004a);
+      border-bottom: 2px solid var(--border);
+      border-top: 2px solid var(--border2);
+      overflow: hidden;
+      padding: 4px 0;
+      white-space: nowrap;
+    }
+    .marquee-inner {
+      display: inline-block;
+      animation: marquee 28s linear infinite;
+      color: var(--cyan);
+      font-size: 11px;
+      letter-spacing: 0.05em;
+    }
+    .marquee-inner span { margin: 0 2.5rem; }
+    @keyframes marquee { from { transform: translateX(100vw); } to { transform: translateX(-100%); } }
+
+    /* ── Main layout ── */
+    .page-wrap {
+      position: relative;
+      z-index: 1;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 12px 60px;
+    }
+
+    /* ── Header ── */
+    .blog-header {
+      text-align: center;
+      padding: 30px 16px 20px;
+      border-bottom: 1px dashed var(--border);
+      margin-bottom: 24px;
+    }
+    .blog-header-title {
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: clamp(2rem, 6vw, 3.4rem);
+      font-weight: bold;
+      font-style: italic;
+      color: var(--glow);
+      text-shadow:
+        0 0 10px var(--glow),
+        0 0 30px rgba(180,77,255,0.5),
+        0 0 60px rgba(180,77,255,0.2);
+      letter-spacing: 0.02em;
+      margin-bottom: 6px;
+    }
+    .blog-header-sub {
+      color: var(--cyan);
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .blog-header-nav {
+      margin-top: 14px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+    }
+    .blog-header-nav a {
+      color: var(--link);
+      text-decoration: none;
+      font-size: 11px;
+      padding: 3px 10px;
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      background: rgba(123,47,255,0.1);
+      transition: background 0.2s, color 0.2s;
+    }
+    .blog-header-nav a:hover {
+      background: var(--border);
+      color: #fff;
+    }
+    .blog-header-nav .sep { color: var(--gray); font-size: 11px; align-self: center; }
+
+    /* ── Two-column layout ── */
+    .blog-cols {
+      display: grid;
+      grid-template-columns: 1fr 220px;
+      gap: 20px;
+      align-items: start;
+    }
+    @media (max-width: 680px) {
+      .blog-cols { grid-template-columns: 1fr; }
+      .sidebar { order: -1; }
+    }
+
+    /* ── Generic panel ── */
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .panel-title {
+      background: linear-gradient(90deg, #2a006a, #4a00aa);
+      color: var(--cyan);
+      font-size: 10px;
+      font-weight: bold;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      padding: 5px 10px;
+      border-bottom: 1px solid var(--border);
+    }
+    .panel-body {
+      padding: 12px;
+    }
+
+    /* ── Blog post ── */
+    .post {
+      margin-bottom: 22px;
+    }
+    .post-header {
+      background: linear-gradient(90deg, #1e0050, #33007a);
+      border-bottom: 1px dotted var(--border2);
+      padding: 8px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+    .post-title {
+      font-family: Georgia, serif;
+      font-size: 15px;
+      font-weight: bold;
+      color: var(--yellow);
+      text-shadow: 0 0 8px rgba(255,229,102,0.4);
+    }
+    .post-title a {
+      color: inherit;
+      text-decoration: none;
+    }
+    .post-title a:hover { text-decoration: underline; }
+    .post-date {
+      color: var(--gray);
+      font-size: 10px;
+      white-space: nowrap;
+    }
+    .post-meta {
+      display: flex;
+      gap: 12px;
+      padding: 5px 12px;
+      background: rgba(0,0,0,0.3);
+      border-bottom: 1px solid rgba(123,47,255,0.2);
+      font-size: 10px;
+      color: var(--gray);
+    }
+    .post-meta .mood { color: var(--pink); }
+    .post-meta .music { color: var(--cyan); }
+    .post-body {
+      padding: 14px 12px;
+      font-size: 12.5px;
+      line-height: 1.75;
+      color: #ddd0f5;
+    }
+    .post-body p { margin-bottom: 10px; }
+    .post-body p:last-child { margin-bottom: 0; }
+    .post-body em { color: var(--pink); font-style: italic; }
+    .post-body strong { color: var(--yellow); }
+    .post-body a { color: var(--link); }
+    .post-body a:hover { color: var(--link-vis); }
+    .post-body blockquote {
+      border-left: 3px solid var(--border2);
+      padding: 6px 12px;
+      margin: 12px 0;
+      background: rgba(123,47,255,0.08);
+      color: var(--gray);
+      font-style: italic;
+    }
+    .post-footer {
+      padding: 6px 12px;
+      border-top: 1px dotted rgba(123,47,255,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .post-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+    .tag {
+      font-size: 10px;
+      padding: 1px 7px;
+      border: 1px solid var(--border2);
+      border-radius: 2px;
+      color: var(--link);
+      background: rgba(123,47,255,0.1);
+      cursor: default;
+    }
+    .post-comments-link {
+      font-size: 10px;
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .post-comments-link:hover { text-decoration: underline; }
+
+    /* Divider */
+    .divider {
+      text-align: center;
+      color: var(--border);
+      font-size: 11px;
+      letter-spacing: 0.3em;
+      margin: 6px 0 22px;
+      user-select: none;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar { display: flex; flex-direction: column; gap: 16px; }
+
+    /* About me box */
+    .about-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      border: 2px solid var(--border2);
+      display: block;
+      margin: 0 auto 10px;
+      object-fit: cover;
+      box-shadow: 0 0 14px rgba(180,77,255,0.5);
+    }
+    .about-avatar-placeholder {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      border: 2px solid var(--border2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 10px;
+      font-size: 32px;
+      background: rgba(123,47,255,0.15);
+      box-shadow: 0 0 14px rgba(180,77,255,0.5);
+    }
+    .about-name {
+      text-align: center;
+      font-family: Georgia, serif;
+      font-weight: bold;
+      color: var(--glow);
+      font-size: 13px;
+      text-shadow: 0 0 8px rgba(180,77,255,0.5);
+      margin-bottom: 4px;
+    }
+    .about-handle {
+      text-align: center;
+      font-size: 10px;
+      color: var(--gray);
+      margin-bottom: 10px;
+    }
+    .about-text {
+      font-size: 11.5px;
+      color: #c0b0e0;
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    /* Status rows */
+    .status-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      padding: 4px 0;
+      border-bottom: 1px dotted rgba(123,47,255,0.2);
+      color: #c0b0e0;
+    }
+    .status-row:last-child { border-bottom: none; }
+    .status-row .key { color: var(--gray); }
+    .status-row .val { color: var(--cyan); text-align: right; }
+
+    /* Visitor counter */
+    .counter-wrap {
+      text-align: center;
+      padding: 10px;
+    }
+    .counter-label {
+      font-size: 10px;
+      color: var(--gray);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      margin-bottom: 6px;
+    }
+    .counter-digits {
+      display: inline-flex;
+      gap: 2px;
+    }
+    .counter-digit {
+      background: #000;
+      color: var(--lime);
+      font-family: 'Courier Prime', Courier, monospace;
+      font-size: 18px;
+      font-weight: bold;
+      padding: 2px 5px;
+      border: 1px solid #333;
+      min-width: 22px;
+      text-align: center;
+      text-shadow: 0 0 6px var(--lime);
+    }
+
+    /* Links list */
+    .links-list { list-style: none; }
+    .links-list li {
+      padding: 4px 0;
+      border-bottom: 1px dotted rgba(123,47,255,0.2);
+    }
+    .links-list li:last-child { border-bottom: none; }
+    .links-list a {
+      color: var(--link);
+      font-size: 11.5px;
+      text-decoration: none;
+    }
+    .links-list a:hover { color: var(--pink); text-decoration: underline; }
+    .links-list .arrow { color: var(--border2); margin-right: 4px; }
+
+    /* Blinking cursor */
+    .blink {
+      animation: blink 1s step-end infinite;
+      color: var(--cyan);
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+    /* Glitter/sparkle animation */
+    .sparkle {
+      display: inline-block;
+      animation: sparkle 2s ease-in-out infinite;
+    }
+    @keyframes sparkle {
+      0%,100% { color: var(--cyan); text-shadow: 0 0 4px var(--cyan); }
+      33%      { color: var(--pink); text-shadow: 0 0 4px var(--pink); }
+      66%      { color: var(--yellow); text-shadow: 0 0 4px var(--yellow); }
+    }
+
+    /* Footer */
+    .blog-footer {
+      text-align: center;
+      padding: 24px 16px;
+      border-top: 1px dashed var(--border);
+      color: var(--gray);
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      margin-top: 40px;
+    }
+    .blog-footer a { color: var(--link); text-decoration: none; }
+    .blog-footer a:hover { text-decoration: underline; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg2); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--border2); }
+
+    /* Image in post */
+    .post-img {
+      max-width: 100%;
+      border: 2px solid var(--border);
+      border-radius: 2px;
+      margin: 10px 0;
+      display: block;
+    }
+
+    /* NEW POST button (for future use) */
+    .back-btn {
+      display: inline-block;
+      color: var(--cyan);
+      text-decoration: none;
+      font-size: 11px;
+      padding: 4px 12px;
+      border: 1px solid var(--cyan);
+      border-radius: 2px;
+      background: rgba(0,255,238,0.05);
+      transition: background 0.2s;
+    }
+    .back-btn:hover { background: rgba(0,255,238,0.15); }
+
+    /* Glow pulse on panel borders */
+    .panel {
+      box-shadow: 0 0 0 0 rgba(123,47,255,0);
+      transition: box-shadow 0.4s;
+    }
+    .panel:hover {
+      box-shadow: 0 0 14px rgba(123,47,255,0.25);
+    }
+  </style>
+</head>
+<body>
+
+<!-- Starfield -->
+<canvas id="stars-canvas"></canvas>
+
+<!-- Marquee banner -->
+<div class="marquee-wrap">
+  <div class="marquee-inner">
+    <span>✦ bienvenid@ a mi blog ✦</span>
+    <span>✦ mibullfire's corner of the internet ✦</span>
+    <span>✦ bienvenid@ a mi blog ✦</span>
+  </div>
+</div>
+
+<div class="page-wrap">
+
+  <!-- Header -->
+  <header class="blog-header">
+    <div class="blog-header-title">
+      <span class="sparkle">✦</span> mibullfire's blog <span class="sparkle">✦</span>
+    </div>
+    <div class="blog-header-sub">mi trocillo de internet <span class="blink">_</span></div>
+    <nav class="blog-header-nav">
+      <a href="index.html">← volver a la web</a>
+      <span class="sep">·</span>
+      <a href="aplicaciones.html">aplicaciones</a>
+      <span class="sep">·</span>
+      <a href="https://www.instagram.com/justmibu/" target="_blank" rel="noopener">instagram</a>
+    </nav>
+  </header>
+
+  <!-- Two-column layout -->
+  <div class="blog-cols">
+
+    <!-- Main content: posts -->
+    <main>
+
+      <!-- ═══════════════════════════════════════════════
+           POSTS — Para añadir uno nuevo, copia el bloque
+           .panel.post completo y pégalo aquí arriba.
+           ═══════════════════════════════════════════════ -->
+
+      <!-- POST 1 -->
+      <div class="panel post">
+        <div class="post-header">
+          <span class="post-title">hola mundo mibu al habla!</span>
+          <span class="post-date">16 mayo 2026 · 14:53</span>
+        </div>
+        <div class="post-meta">
+          <span class="mood">mood: <em>hasta la polla de los parciales ✦</em></span>
+          <span class="music">🎵 actualmente: FLORIDA MAN</span>
+        </div>
+        <div class="post-body">
+          <p>
+            bueno, he tenido la maravillosa idea de hacerme un blog como si fueran los 2000s. xq? Porque estoy en la última semana de examenes
+            y necesito descansar, y no se me ocurre otra cosa que seguir haciendo cosas que tengan que ver con la puta informatica...
+          </p>
+          <p>
+            llevo queriendo hacer esto un monton de tiempo, es como twitter, pero solo escribo yo, y encima lo ve menos gente, nadie seguramente xd
+          </p>
+          <blockquote>
+            #InternetSigueVivo
+          </blockquote>
+          <p>
+            bueno, gracias por leer esta mierda, y ya iré subiendo cosillas <strong>puruburubum</strong>
+          </p>
+        </div>
+        <div class="post-footer">
+          <div class="post-tags">
+            <span class="tag">primer post</span>
+          </div>
+          <a class="post-comments-link" href="#">0 comentarios (tengo que implementar comentarios)</a>
+        </div>
+      </div>
+
+      <div class="divider">· · · ✦ · · ·</div>
+
+    </main>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+
+      <!-- About me -->
+      <div class="panel">
+        <div class="panel-title">about me</div>
+        <div class="panel-body">
+          <div class="about-avatar-placeholder">😛</div>
+          <div class="about-name">Miguel Toro</div>
+          <div class="about-handle">@ mibullfire</div>
+          <div class="about-text">
+            chuchu gua chuchu gua chuchu gua gua gua
+          </div>
+        </div>
+      </div>
+
+      <!-- Estado actual -->
+      <div class="panel">
+        <div class="panel-title">estado actual</div>
+        <div class="panel-body">
+          <div class="status-row">
+            <span class="key">mood</span>
+            <span class="val">cansado ✦</span>
+          </div>
+          <div class="status-row">
+            <span class="key">música</span>
+            <span class="val">Riff Off - The Bellas</span>
+          </div>
+          <div class="status-row">
+            <span class="key">leyendo</span>
+            <span class="val">Guía del Autoestopista Galáctico</span>
+          </div>
+          <div class="status-row">
+            <span class="key">ocupado</span>
+            <span class="val">nunca, vamos a por una cerveza porfa</span>
+          </div>
+          <div class="status-row">
+            <span class="key">cafeina</span>
+            <span class="val">demasiada</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Visitor counter -->
+      <div class="panel">
+        <div class="panel-title">visitantes</div>
+        <div class="counter-wrap">
+          <div class="counter-label">total de visitas</div>
+          <div class="counter-digits" id="counter">
+            <span class="counter-digit">0</span>
+            <span class="counter-digit">0</span>
+            <span class="counter-digit">0</span>
+            <span class="counter-digit">0</span>
+            <span class="counter-digit">0</span>
+            <span class="counter-digit">0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Links -->
+      <div class="panel">
+        <div class="panel-title">links</div>
+        <div class="panel-body">
+          <ul class="links-list">
+            <li><a href="index.html"><span class="arrow">›</span>mi portfolio</a></li>
+            <li><a href="aplicaciones.html"><span class="arrow">›</span>mis apps</a></li>
+            <li><a href="https://github.com/mibullfire" target="_blank" rel="noopener"><span class="arrow">›</span>github</a></li>
+            <li><a href="https://www.instagram.com/justmibu/" target="_blank" rel="noopener"><span class="arrow">›</span>instagram</a></li>
+            <li><a href="https://x.com/mibullfire" target="_blank" rel="noopener"><span class="arrow">›</span>twitter / x</a></li>
+          </ul>
+        </div>
+      </div>
+
+    </aside>
+  </div>
+
+  <!-- Footer -->
+  <footer class="blog-footer">
+    <div>
+      <span class="sparkle">✦</span>
+      mibullfire's blog · made in Jerez ·
+      <a href="index.html">volver al portfolio</a>
+      <span class="sparkle">✦</span>
+    </div>
+    <div style="margin-top:6px;color:#554477;">
+      &copy; 2026 mibullfire
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  // ── Starfield ──────────────────────────────────────────
+  (function() {
+    const canvas = document.getElementById('stars-canvas');
+    const ctx = canvas.getContext('2d');
+    let W, H, stars = [];
+
+    function resize() {
+      W = canvas.width  = window.innerWidth;
+      H = canvas.height = Math.max(document.body.scrollHeight, window.innerHeight);
+    }
+
+    function initStars(n) {
+      stars = [];
+      for (let i = 0; i < n; i++) {
+        stars.push({
+          x:  Math.random() * W,
+          y:  Math.random() * H,
+          r:  Math.random() * 1.2 + 0.2,
+          o:  Math.random(),
+          do: (Math.random() - 0.5) * 0.008,
+        });
+      }
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+      for (const s of stars) {
+        s.o += s.do;
+        if (s.o <= 0 || s.o >= 1) s.do *= -1;
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(200,170,255,${s.o * 0.7})`;
+        ctx.fill();
+      }
+      requestAnimationFrame(draw);
+    }
+
+    window.addEventListener('resize', () => { resize(); initStars(220); });
+    resize();
+    initStars(220);
+    draw();
+  })();
+
+  // ── Animated counter ──────────────────────────────────
+  (function() {
+    const stored = localStorage.getItem('blog_visits');
+    const visits = stored ? parseInt(stored, 10) + 1 : 1337;
+    localStorage.setItem('blog_visits', visits);
+    const s = String(visits).padStart(6, '0');
+    const digits = document.querySelectorAll('#counter .counter-digit');
+    digits.forEach((d, i) => { if (s[i] !== undefined) d.textContent = s[i]; });
+  })();
+</script>
+
+</body>
+</html>
