@@ -278,9 +278,101 @@
       .phrase-card { padding: 2rem 1.4rem; min-height: 220px; }
       .app-footer { flex-direction: column; gap: 0.5rem; text-align: center; padding: 1.2rem; }
     }
+
+    /* ── Age gate ── */
+    .age-gate {
+      position: fixed; inset: 0; z-index: 10000;
+      background: rgba(10,10,10,0.97);
+      backdrop-filter: blur(10px);
+      display: flex; align-items: center; justify-content: center;
+      padding: 1.5rem;
+      opacity: 1; transition: opacity 0.35s ease;
+    }
+    .age-gate.hiding { opacity: 0; pointer-events: none; }
+    .age-gate::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(255,77,171,0.10) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .age-box {
+      position: relative; z-index: 1;
+      width: 100%; max-width: 440px;
+      background: var(--dark); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: var(--radius-lg);
+      padding: 2.6rem 2rem;
+      text-align: center;
+      display: flex; flex-direction: column; align-items: center; gap: 0.9rem;
+      animation: ageIn 0.4s ease;
+    }
+    @keyframes ageIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+    .age-icon { font-size: 2.4rem; line-height: 1; }
+    .age-tag {
+      font-size: 0.7rem; font-weight: 700; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--accent); opacity: 0.8;
+    }
+    .age-title {
+      font-family: 'Playfair Display', serif;
+      font-style: italic; font-weight: 700;
+      font-size: clamp(1.5rem, 5vw, 2rem);
+      line-height: 1.2; color: var(--white);
+    }
+    .age-text { font-size: 0.9rem; line-height: 1.6; color: var(--gray); max-width: 340px; }
+    .age-actions { display: flex; gap: 0.7rem; flex-wrap: wrap; justify-content: center; margin-top: 0.6rem; }
+    .age-btn {
+      display: inline-block;
+      background: var(--accent); color: var(--black);
+      border-radius: 100px; padding: 0.85rem 2rem;
+      font-size: 0.9rem; font-weight: 700; letter-spacing: 0.01em;
+      transition: background 0.3s, transform 0.2s;
+    }
+    .age-btn:hover { background: var(--accent2); transform: translateY(-2px); }
+    .age-btn--no {
+      background: transparent; color: var(--white2);
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+    .age-btn--no:hover { background: var(--dark3); color: var(--white); border-color: rgba(255,255,255,0.2); }
+    .age-note { font-size: 0.72rem; color: var(--gray2); margin-top: 0.4rem; }
+    .age-pane { display: flex; flex-direction: column; align-items: center; gap: 0.9rem; }
+    .age-pane[hidden] { display: none; }
   </style>
 </head>
 <body>
+
+  <!-- Verificacion de edad -->
+  <div class="age-gate" id="ageGate">
+    <div class="age-box">
+
+      <div class="age-pane" id="ageAsk">
+        <span class="age-icon">🍻</span>
+        <span class="age-tag">Contenido +18</span>
+        <h2 class="age-title">¿Tienes más de 18 años?</h2>
+        <p class="age-text">
+          Este juego contiene lenguaje y situaciones para adultos, además de referencias
+          al consumo de alcohol. Confirma tu edad para continuar.
+        </p>
+        <div class="age-actions">
+          <button class="age-btn" id="ageYes">Sí, soy mayor de 18</button>
+          <button class="age-btn age-btn--no" id="ageNo">No, soy menor</button>
+        </div>
+        <p class="age-note">Bebe con responsabilidad · Nunca conduzcas si has bebido</p>
+      </div>
+
+      <div class="age-pane" id="ageDenied" hidden>
+        <span class="age-icon">🚫</span>
+        <span class="age-tag">Acceso restringido</span>
+        <h2 class="age-title">Lo sentimos</h2>
+        <p class="age-text">
+          Tienes que ser mayor de 18 años para jugar a Yo Nunca.
+          Pero hay muchas otras apps esperándote.
+        </p>
+        <div class="age-actions">
+          <a class="age-btn" href="../aplicaciones.html">← Ver otras apps</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
 
   <div class="cursor" id="cursor"></div>
   <div class="cursor-follower" id="cursorFollower"></div>
@@ -347,6 +439,34 @@
   </footer>
 
   <script>
+    /* ── Verificacion de edad ── */
+    (function ageGate() {
+      const gate = document.getElementById('ageGate');
+      const KEY = 'yoNuncaMayorDeEdad';
+
+      let verificado = false;
+      try { verificado = sessionStorage.getItem(KEY) === 'si'; } catch (e) {}
+
+      if (verificado) {
+        gate.remove();
+        return;
+      }
+
+      document.body.style.overflow = 'hidden';
+
+      document.getElementById('ageYes').addEventListener('click', () => {
+        try { sessionStorage.setItem(KEY, 'si'); } catch (e) {}
+        gate.classList.add('hiding');
+        document.body.style.overflow = '';
+        setTimeout(() => gate.remove(), 400);
+      });
+
+      document.getElementById('ageNo').addEventListener('click', () => {
+        document.getElementById('ageAsk').hidden = true;
+        document.getElementById('ageDenied').hidden = false;
+      });
+    })();
+
     /* ── Cursor ── */
     const cur = document.getElementById('cursor');
     const fol = document.getElementById('cursorFollower');
