@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>panel · mibullfire's blog</title>
+  <link rel="icon" type="image/png" href="img/web-icon.png" />
+  <link rel="stylesheet" href="blog.css" />
+  <style>
+    .admin-wrap { max-width: 640px; margin: 0 auto; padding: 24px 12px 60px; position: relative; z-index: 1; }
+    .admin-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
+    .admin-top h1 {
+      font-family: Georgia, serif; font-style: italic; font-size: 22px; color: var(--glow);
+      text-shadow: 0 0 10px var(--glow);
+    }
+    .admin-top nav { display: flex; gap: 8px; }
+    .stack { display: flex; flex-direction: column; gap: 10px; }
+    .field { width: 100%; }
+    textarea.field { min-height: 140px; resize: vertical; font-size: 14px; line-height: 1.6; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    @media (max-width: 520px) { .row { grid-template-columns: 1fr; } }
+    label.lbl { font-size: 10px; color: var(--gray); text-transform: uppercase; letter-spacing: 0.12em; display: block; margin-bottom: 3px; }
+    .composer-bar { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .composer-tools { display: flex; align-items: center; gap: 10px; }
+    .counter { font-size: 11px; color: var(--gray); }
+    .counter.over { color: var(--pink); }
+    .primary-btn {
+      font-family: inherit; font-size: 12px; font-weight: bold; letter-spacing: 0.05em;
+      padding: 7px 18px; border: 1px solid var(--cyan); border-radius: 2px; cursor: pointer;
+      color: var(--bg); background: var(--cyan); box-shadow: 0 0 10px rgba(0,255,238,0.35);
+    }
+    .primary-btn:hover { background: #7ffff6; }
+    .primary-btn:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
+    .previews { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+    .previews:empty { display: none; }
+    .preview { position: relative; aspect-ratio: 1 / 1; border: 1px solid var(--border); background: #000; }
+    .preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .preview button {
+      position: absolute; top: 3px; right: 3px; width: 22px; height: 22px; border-radius: 50%;
+      border: none; background: rgba(0,0,0,0.75); color: #fff; cursor: pointer; font-size: 12px; line-height: 1;
+    }
+    .msg { font-size: 12px; min-height: 1em; }
+    .msg.error { color: var(--pink); }
+    .msg.ok { color: var(--lime); }
+    details summary { cursor: pointer; font-size: 11px; color: var(--link); user-select: none; }
+    details[open] summary { margin-bottom: 10px; }
+    .help { font-size: 10.5px; color: var(--gray); line-height: 1.7; }
+    .help code { color: var(--cyan); font-family: 'Courier Prime', Courier, monospace; }
+    .section-title { margin: 28px 0 12px; font-size: 11px; color: var(--cyan); letter-spacing: 0.2em; text-transform: uppercase; }
+    .login { max-width: 360px; margin: 12vh auto 0; }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+
+<canvas id="stars-canvas"></canvas>
+
+<div class="admin-wrap">
+
+  <!-- Contraseña -->
+  <form class="panel login" id="login">
+    <div class="panel-title">panel del blog</div>
+    <div class="panel-body stack">
+      <label class="lbl" for="password">contraseña</label>
+      <input class="field" type="password" id="password" autocomplete="current-password" required autofocus />
+      <label class="check"><input type="checkbox" id="remember" /> recordar en este dispositivo</label>
+      <button class="primary-btn" type="submit">entrar ✦</button>
+      <div class="msg error" id="login-msg" role="alert"></div>
+    </div>
+  </form>
+
+  <!-- Panel -->
+  <div id="app" hidden>
+    <div class="admin-top">
+      <h1>✦ nuevo post</h1>
+      <nav>
+        <a class="back-btn" href="/" target="_blank" rel="noopener">ver blog ↗</a>
+        <button class="back-btn" type="button" id="logout">salir</button>
+      </nav>
+    </div>
+
+    <form class="panel" id="composer">
+      <div class="panel-body stack">
+        <textarea class="field" id="body" maxlength="10000" placeholder="¿qué está pasando, mibu? ✦"></textarea>
+
+        <div class="previews" id="previews"></div>
+
+        <details>
+          <summary>título, mood, música y tags (opcional)</summary>
+          <div class="stack">
+            <div>
+              <label class="lbl" for="title">título</label>
+              <input class="field" id="title" maxlength="200" />
+            </div>
+            <div class="row">
+              <div>
+                <label class="lbl" for="mood">mood</label>
+                <input class="field" id="mood" maxlength="200" placeholder="contentillo ✦" />
+              </div>
+              <div>
+                <label class="lbl" for="music">música</label>
+                <input class="field" id="music" maxlength="200" placeholder="canción - artista" />
+              </div>
+            </div>
+            <div>
+              <label class="lbl" for="tags">tags (separados por comas)</label>
+              <input class="field" id="tags" maxlength="400" placeholder="verano, cervecitas" list="tag-list" />
+              <datalist id="tag-list"></datalist>
+            </div>
+            <p class="help">
+              formato: línea en blanco = párrafo nuevo · <code>**negrita**</code> · <code>*cursiva*</code> ·
+              <code>&gt; cita</code> · los enlaces se ponen solos
+            </p>
+          </div>
+        </details>
+
+        <div class="composer-bar">
+          <div class="composer-tools">
+            <button class="back-btn" type="button" id="add-photos">📷 fotos</button>
+            <input type="file" id="photos" accept="image/jpeg,image/png,image/gif,image/webp,image/heic,image/heif" multiple hidden />
+            <span class="counter" id="counter">0 / 10000</span>
+          </div>
+          <button class="primary-btn" type="submit" id="publish">publicar</button>
+        </div>
+        <div class="msg" id="composer-msg" role="status"></div>
+      </div>
+    </form>
+
+    <div class="section-title">tus posts</div>
+    <div id="posts"></div>
+    <div style="text-align:center">
+      <button class="back-btn" type="button" id="more" hidden>cargar más</button>
+    </div>
+  </div>
+
+</div>
+
+<script src="js/post-render.js"></script>
+<script>
+  // ── Starfield (igual que en el blog) ──
+  (function () {
+    const canvas = document.getElementById('stars-canvas');
+    const ctx = canvas.getContext('2d');
+    let stars = [];
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      stars = Array.from({ length: 160 }, () => ({
+        x: Math.random() * canvas.width, y: Math.random() * canvas.height,
+        r: Math.random() * 1.2 + 0.2, o: Math.random(), d: (Math.random() - 0.5) * 0.008,
+      }));
+    }
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (const s of stars) {
+        s.o += s.d;
+        if (s.o <= 0 || s.o >= 1) s.d *= -1;
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(200,170,255,${s.o * 0.7})`;
+        ctx.fill();
+      }
+      requestAnimationFrame(draw);
+    }
+    window.addEventListener('resize', resize);
+    resize();
+    draw();
+  })();
+</script>
+<script src="js/admin.js"></script>
+</body>
+</html>
