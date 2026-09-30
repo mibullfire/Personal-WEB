@@ -485,32 +485,54 @@
       sel.appendChild(o);
     });
 
-    /* ── Encode / Decode (UTF-8 safe) ── */
-    function encode(text) {
-      const bytes = new TextEncoder().encode(text);
+    /* ── Encode / Decode ──
+       Formato nuevo:  #z:<lang>:<deflate-raw + base64url>
+       Formato antiguo: #<lang>:<base64>  (se sigue leyendo) */
+    function bytesToB64url(bytes) {
       let bin = '';
-      bytes.forEach(b => bin += String.fromCharCode(b));
-      return btoa(bin);
+      for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+      return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
     }
 
-    function decode(b64) {
+    function b64urlToBytes(str) {
+      const b64 = str.replace(/-/g, '+').replace(/_/g, '/');
+      const bin = atob(b64 + '='.repeat((4 - b64.length % 4) % 4));
+      return Uint8Array.from(bin, c => c.charCodeAt(0));
+    }
+
+    async function pipeBytes(bytes, stream) {
+      const buf = await new Response(new Blob([bytes]).stream().pipeThrough(stream)).arrayBuffer();
+      return new Uint8Array(buf);
+    }
+
+    async function encodeHash(lang, text) {
+      const compressed = await pipeBytes(new TextEncoder().encode(text), new CompressionStream('deflate-raw'));
+      return 'z:' + lang + ':' + bytesToB64url(compressed);
+    }
+
+    function decodeLegacy(b64) {
       try {
-        const bin = atob(b64);
-        const bytes = new Uint8Array([...bin].map(c => c.charCodeAt(0)));
-        return new TextDecoder().decode(bytes);
+        return new TextDecoder().decode(Uint8Array.from(atob(b64), c => c.charCodeAt(0)));
       } catch { return null; }
     }
 
     /* ── Parse hash ── */
-    function parseHash() {
+    async function parseHash() {
       const hash = location.hash.slice(1);
       if (!hash) return null;
+      if (hash.startsWith('z:')) {
+        const idx = hash.indexOf(':', 2);
+        if (idx === -1) return null;
+        try {
+          const bytes = await pipeBytes(b64urlToBytes(hash.slice(idx + 1)), new DecompressionStream('deflate-raw'));
+          return { lang: hash.slice(2, idx), code: new TextDecoder().decode(bytes) };
+        } catch { return null; }
+      }
       const idx = hash.indexOf(':');
       if (idx === -1) return null;
-      const lang = hash.slice(0, idx);
-      const code = decode(hash.slice(idx + 1));
+      const code = decodeLegacy(hash.slice(idx + 1));
       if (code === null) return null;
-      return { lang, code };
+      return { lang: hash.slice(0, idx), code };
     }
 
     /* ── Mode switching ── */
@@ -538,8 +560,7 @@
         hljs.highlightElement(codeEl);
       }
 
-      const shareURL = location.href.split('#')[0] + '#' + lang + ':' + encode(code);
-      document.getElementById('shareUrl').value = shareURL;
+      document.getElementById('shareUrl').value = location.href;
     }
 
     /* ── Char count ── */
@@ -561,13 +582,12 @@
     });
 
     /* ── Share button ── */
-    document.getElementById('shareBtn').addEventListener('click', () => {
+    document.getElementById('shareBtn').addEventListener('click', async () => {
       const code = codeInput.value.trim();
       if (!code) { showToast('Escribe algo primero 😅'); return; }
       if (code.length > 60000) { showToast('El código es demasiado largo para un enlace.'); return; }
       const lang = sel.value;
-      const encoded = encode(code);
-      history.replaceState(null, '', '#' + lang + ':' + encoded);
+      history.replaceState(null, '', '#' + await encodeHash(lang, code));
       showViewMode(lang, code);
       navigator.clipboard.writeText(location.href).then(() => {
         showToast('¡Enlace copiado al portapapeles!');
@@ -598,13 +618,14 @@
     });
 
     /* ── Init ── */
-    const parsed = parseHash();
-    if (parsed) {
-      sel.value = parsed.lang || 'plaintext';
-      showViewMode(parsed.lang, parsed.code);
-    } else {
-      showEditMode();
-    }
+    parseHash().then(parsed => {
+      if (parsed) {
+        sel.value = parsed.lang || 'plaintext';
+        showViewMode(parsed.lang, parsed.code);
+      } else {
+        showEditMode();
+      }
+    });
 
     /* ── Page fade in ── */
     document.body.style.opacity = '0';
