@@ -18,7 +18,7 @@ const DEFAULT_HOME = 'index.html';
 
 // Paginas que pertenecen a la web principal: si se piden desde el blog,
 // se redirigen al dominio principal (y al reves con blog.html).
-const MAIN_ONLY = new Set(['/index.html', '/aplicaciones.html']);
+const MAIN_ONLY = new Set(['/index.html', '/aplicaciones.html', '/juegos.html']);
 
 // Codigo del servidor y ficheros internos: nunca se sirven como estaticos.
 const PRIVATE_ROOT_FILES = new Set([

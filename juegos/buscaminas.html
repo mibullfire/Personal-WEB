@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Buscaminas — Miguel Toro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="../img/web-icon.png" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --black: #0a0a0a; --dark: #111111; --dark2: #1a1a1a;
+      --white: #f5f5f5; --white2: #e0e0e0; --gray: #888; --gray2: #444;
+      --accent: #ff4dab; --accent2: #ff1a96; --radius: 12px; --radius-lg: 16px;
+      /* Paleta Windows clásica */
+      --w-face: #c0c0c0; --w-light: #ffffff; --w-light2: #dfdfdf; --w-shadow: #808080; --w-dark: #0a0a0a;
+      --w-title: #000080; --w-title2: #1084d0; --w-desk: #008080;
+      --w-font: 'Tahoma', 'MS Sans Serif', 'Segoe UI', 'DejaVu Sans', 'Verdana', sans-serif;
+    }
+    html { font-size: 16px; }
+    body { background: var(--black); color: var(--white); font-family: 'Inter', sans-serif; overflow-x: hidden; cursor: none; min-height: 100vh; display: flex; flex-direction: column; }
+    a { text-decoration: none; color: inherit; }
+    button { cursor: none; font-family: inherit; border: none; outline: none; }
+
+    .cursor { width: 10px; height: 10px; background: var(--accent); border-radius: 50%; position: fixed; top: 0; left: 0; pointer-events: none; z-index: 9999; transform: translate(-50%,-50%); transition: width .3s, height .3s; }
+    .cursor-follower { width: 36px; height: 36px; border: 1.5px solid rgba(255,77,171,.4); border-radius: 50%; position: fixed; top: 0; left: 0; pointer-events: none; z-index: 9998; transform: translate(-50%,-50%); transition: transform .15s ease, width .3s, height .3s, border-color .3s; }
+    body:has(a:hover) .cursor, body:has(button:hover) .cursor { width: 16px; height: 16px; }
+    body:has(a:hover) .cursor-follower, body:has(button:hover) .cursor-follower { width: 56px; height: 56px; border-color: rgba(255,77,171,.8); }
+    @media (pointer: coarse) { body { cursor: auto; } button { cursor: auto; } .cursor, .cursor-follower { display: none; } }
+
+    .app-nav { position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 1.1rem 2.5rem; background: rgba(10,10,10,.9); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,.06); }
+    .app-nav-logo { display: flex; align-items: center; gap: .6rem; font-weight: 700; font-size: .95rem; letter-spacing: -.02em; }
+    .app-nav-star { color: var(--accent); animation: navSpin 8s linear infinite; }
+    @keyframes navSpin { to { transform: rotate(360deg); } }
+    .app-nav-back { font-size: .82rem; font-weight: 600; color: var(--gray); padding: .45rem 1rem; border: 1px solid rgba(255,255,255,.09); border-radius: 100px; transition: color .3s, border-color .3s, background .3s; }
+    .app-nav-back:hover { color: var(--accent); border-color: rgba(255,77,171,.3); background: rgba(255,77,171,.05); }
+
+    .tool-main { flex: 1; max-width: 1000px; width: 100%; margin: 0 auto; padding: 3rem 2rem 5rem; display: flex; flex-direction: column; align-items: center; gap: 1.6rem; }
+    .tool-head { width: 100%; max-width: 560px; }
+    .tool-title-row { display: flex; align-items: center; gap: 1rem; margin-bottom: .4rem; width: 100%; }
+    .tool-icon { font-size: 1.8rem; background: rgba(255,77,171,.08); border: 1px solid rgba(255,77,171,.2); padding: .3rem .65rem; border-radius: var(--radius); line-height: 1.3; }
+    .tool-title { font-size: clamp(1.6rem,4vw,2.4rem); font-weight: 900; letter-spacing: -.04em; }
+    .tool-subtitle { font-size: .92rem; color: var(--gray); width: 100%; }
+
+    .levels { display: flex; gap: .5rem; flex-wrap: wrap; justify-content: center; }
+    .level-btn { background: transparent; color: var(--gray); border: 1px solid rgba(255,255,255,.09); border-radius: 100px; padding: .5rem 1.1rem; font-size: .83rem; font-weight: 600; transition: color .3s, border-color .3s, background .3s; }
+    .level-btn small { font-weight: 500; opacity: .7; margin-left: .3rem; }
+    .level-btn:hover { color: var(--white); border-color: rgba(255,255,255,.2); }
+    .level-btn.active { color: var(--accent); border-color: rgba(255,77,171,.4); background: rgba(255,77,171,.08); }
+
+    .hint { font-size: .82rem; color: var(--gray); text-align: center; line-height: 1.7; }
+    .hint kbd { font-family: inherit; font-size: .75rem; font-weight: 700; color: var(--white2); background: var(--dark2); border: 1px solid rgba(255,255,255,.1); border-radius: 6px; padding: .05rem .4rem; }
+
+    /* ════════ Escritorio retro ════════ */
+    .desktop { width: 100%; background: var(--w-desk); border-radius: var(--radius-lg); padding: 28px 16px; display: flex; justify-content: center; align-items: flex-start; min-height: 320px; box-shadow: 0 16px 50px rgba(0,0,0,.6); }
+
+    .win { font-family: var(--w-font); font-size: 12px; color: #000; background: var(--w-face); padding: 3px; display: inline-flex; flex-direction: column; max-width: 100%; min-width: 0; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+      box-shadow: inset -1px -1px var(--w-dark), inset 1px 1px var(--w-light2), inset -2px -2px var(--w-shadow), inset 2px 2px var(--w-light); }
+    .titlebar { display: flex; align-items: center; gap: 4px; height: 20px; padding: 0 2px 0 3px; background: linear-gradient(90deg, var(--w-title), var(--w-title2)); color: #fff; font-weight: 700; }
+    .titlebar .ttl { flex: 1; display: flex; align-items: center; gap: 4px; white-space: nowrap; overflow: hidden; }
+    .titlebar .ttl svg { width: 14px; height: 14px; flex-shrink: 0; }
+    .tb-btns { display: flex; gap: 2px; }
+    .tb-btn { width: 16px; height: 14px; display: flex; align-items: center; justify-content: center; background: var(--w-face); color: #000; font: 700 11px/1 var(--w-font); padding: 0;
+      box-shadow: inset -1px -1px var(--w-dark), inset 1px 1px var(--w-light), inset -2px -2px var(--w-shadow), inset 2px 2px var(--w-light2); }
+    .tb-btn:active { box-shadow: inset -1px -1px var(--w-light), inset 1px 1px var(--w-dark), inset -2px -2px var(--w-light2), inset 2px 2px var(--w-shadow); }
+    .tb-btn:disabled { color: var(--w-shadow); }
+
+    /* Barra de menús */
+    .menubar { display: flex; padding: 1px 0; position: relative; z-index: 5; }
+    .menu { position: relative; }
+    .menu-title { background: transparent; color: #000; font: 12px var(--w-font); padding: 2px 7px; }
+    .menu.open .menu-title { background: var(--w-title); color: #fff; }
+    .menu-list { display: none; position: absolute; top: 100%; left: 0; min-width: 190px; background: var(--w-face); padding: 3px; flex-direction: column;
+      box-shadow: inset -1px -1px var(--w-dark), inset 1px 1px var(--w-light2), inset -2px -2px var(--w-shadow), inset 2px 2px var(--w-light), 2px 2px 0 rgba(0,0,0,.35); }
+    .menu.open .menu-list { display: flex; }
+    .menu-item { display: flex; justify-content: space-between; gap: 2rem; background: transparent; color: #000; font: 12px var(--w-font); text-align: left; padding: 3px 10px 3px 20px; position: relative; white-space: nowrap; }
+    .menu-item:hover { background: var(--w-title); color: #fff; }
+    .menu-item.checked::before { content: '✓'; position: absolute; left: 6px; font-weight: 700; }
+    .menu-sep { border: 0; border-top: 1px solid var(--w-shadow); border-bottom: 1px solid var(--w-light); margin: 3px 1px; }
+
+    /* Cuerpo del juego */
+    .ms-body { padding: 6px; background: var(--w-face); border: 3px solid; border-color: var(--w-light) var(--w-shadow) var(--w-shadow) var(--w-light); display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+    .ms-head { display: flex; align-items: center; justify-content: space-between; padding: 4px 5px; border: 2px solid; border-color: var(--w-shadow) var(--w-light) var(--w-light) var(--w-shadow); gap: 8px; }
+    .led { display: flex; gap: 1px; background: #000; padding: 1px; border: 1px solid; border-color: var(--w-shadow) var(--w-light) var(--w-light) var(--w-shadow); }
+    .led svg { width: 13px; height: 23px; display: block; }
+    .led polygon { fill: #3d0000; }
+    .led polygon.on { fill: #ff0000; }
+
+    .face { width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; background: var(--w-face); padding: 0; border: 1px solid var(--w-shadow);
+      box-shadow: inset -2px -2px var(--w-shadow), inset 2px 2px var(--w-light); }
+    .face:active { box-shadow: inset 1px 1px var(--w-shadow); }
+    .face:active svg { transform: translate(1px, 1px); }
+    .face svg { width: 26px; height: 26px; }
+
+    .board-wrap { overflow: auto; max-width: 100%; border: 3px solid; border-color: var(--w-shadow) var(--w-light) var(--w-light) var(--w-shadow); }
+    .board { --cs: 24px; display: grid; width: max-content; touch-action: manipulation; }
+    .c { width: var(--cs); height: var(--cs); background: var(--w-face); display: flex; align-items: center; justify-content: center;
+      border: calc(var(--cs) / 8) solid; border-color: var(--w-light) var(--w-shadow) var(--w-shadow) var(--w-light);
+      font: 900 calc(var(--cs) * .66)/1 'Arial Black', 'Tahoma', var(--w-font); }
+    .c svg { width: 78%; height: 78%; display: block; }
+    .c.open, .c.pressed { border: 0; border-left: 1px solid var(--w-shadow); border-top: 1px solid var(--w-shadow); }
+    .c.open svg { width: 70%; height: 70%; }
+    .c.boom { background: #ff0000; }
+    .c.q { color: #000; }
+    .n1 { color: #0000ff; } .n2 { color: #008000; } .n3 { color: #ff0000; } .n4 { color: #000080; }
+    .n5 { color: #800000; } .n6 { color: #008080; } .n7 { color: #000000; } .n8 { color: #808080; }
+
+    /* Botones y controles retro (diálogos) */
+    .w-btn { min-width: 75px; height: 23px; padding: 0 12px; background: var(--w-face); color: #000; font: 12px var(--w-font);
+      box-shadow: inset -1px -1px var(--w-dark), inset 1px 1px var(--w-light), inset -2px -2px var(--w-shadow), inset 2px 2px var(--w-light2); }
+    .w-btn:active, .w-btn.on { box-shadow: inset -1px -1px var(--w-light), inset 1px 1px var(--w-dark), inset -2px -2px var(--w-light2), inset 2px 2px var(--w-shadow); }
+    .w-btn:focus-visible { outline: 1px dotted #000; outline-offset: -4px; }
+    .w-input { font: 12px var(--w-font); background: #fff; color: #000; padding: 3px 4px; border: 0; outline: none; width: 100%;
+      box-shadow: inset -1px -1px var(--w-light), inset 1px 1px var(--w-shadow), inset -2px -2px var(--w-light2), inset 2px 2px var(--w-dark); }
+    .w-input[type="number"] { width: 70px; }
+
+    .flag-mode { display: none; }
+    @media (pointer: coarse) { .flag-mode { display: inline-flex; align-items: center; gap: 6px; } }
+    .flag-mode svg { width: 14px; height: 14px; }
+
+    /* Diálogos */
+    .overlay { position: fixed; inset: 0; z-index: 500; background: rgba(0,0,0,.45); display: flex; align-items: center; justify-content: center; padding: 16px; }
+    .overlay.hidden { display: none; }
+    .dialog { width: 100%; max-width: 360px; }
+    .dialog.wide { max-width: 460px; }
+    .dialog-body { padding: 12px 10px 10px; display: flex; flex-direction: column; gap: 10px; line-height: 1.45; }
+    .dialog-actions { display: flex; justify-content: flex-end; gap: 6px; flex-wrap: wrap; }
+    .form-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .fieldset { border: 1px solid var(--w-shadow); box-shadow: 1px 1px 0 var(--w-light), inset 1px 1px 0 var(--w-light); padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+    .tabs { display: flex; gap: 2px; }
+    .tabs .w-btn { min-width: 0; flex: 1; padding: 0 6px; }
+    .rec-table-wrap { background: #fff; max-height: 260px; overflow: auto;
+      box-shadow: inset -1px -1px var(--w-light), inset 1px 1px var(--w-shadow), inset -2px -2px var(--w-light2), inset 2px 2px var(--w-dark); padding: 2px; }
+    .rec-table { width: 100%; border-collapse: collapse; font: 12px var(--w-font); }
+    .rec-table th { background: var(--w-face); text-align: left; font-weight: 400; padding: 2px 6px; box-shadow: inset -1px -1px var(--w-shadow), inset 1px 1px var(--w-light); position: sticky; top: 0; }
+    .rec-table td { padding: 3px 6px; white-space: nowrap; }
+    .rec-table td.name { max-width: 150px; overflow: hidden; text-overflow: ellipsis; }
+    .rec-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
+    .rec-table tr.new td { background: var(--w-title); color: #fff; }
+    .rec-empty { padding: 16px; text-align: center; color: var(--w-shadow); }
+    .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 12px; }
+    .stats b { font-weight: 700; }
+    .msg-icon { display: flex; gap: 12px; align-items: flex-start; }
+    .msg-icon svg { width: 32px; height: 32px; flex-shrink: 0; }
+
+    .app-footer { display: flex; align-items: center; justify-content: space-between; padding: 1.4rem 2.5rem; border-top: 1px solid rgba(255,255,255,.06); font-size: .8rem; color: var(--gray); }
+    .app-footer a { color: var(--gray); font-weight: 600; transition: color .3s; }
+    .app-footer a:hover { color: var(--accent); }
+
+    @media (max-width: 600px) {
+      .app-nav { padding: 1rem 1.2rem; } .tool-main { padding: 2rem 1rem 4rem; }
+      .desktop { padding: 14px 6px; }
+      .app-footer { flex-direction: column; gap: .5rem; text-align: center; padding: 1.2rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-follower" id="cursorFollower"></div>
+
+  <nav class="app-nav">
+    <a href="../index.html" class="app-nav-logo"><span class="app-nav-star">✦</span><span>Miguel Toro</span></a>
+    <a href="../juegos.html" class="app-nav-back">← Juegos</a>
+  </nav>
+
+  <main class="tool-main">
+    <div class="tool-head">
+      <div class="tool-title-row"><span class="tool-icon">💣</span><h1 class="tool-title">Buscaminas</h1></div>
+      <p class="tool-subtitle">El de toda la vida. Despeja el campo sin pisar ninguna mina y bate tu mejor tiempo.</p>
+    </div>
+
+    <div class="levels" id="levels">
+      <button class="level-btn" data-level="beginner">Principiante<small>9×9 · 10</small></button>
+      <button class="level-btn" data-level="intermediate">Intermedio<small>16×16 · 40</small></button>
+      <button class="level-btn" data-level="expert">Experto<small>30×16 · 99</small></button>
+      <button class="level-btn" data-level="custom">Personalizado<small id="customLabel"></small></button>
+    </div>
+
+    <div class="desktop" id="desktop">
+      <div class="win" id="win">
+        <div class="titlebar">
+          <span class="ttl"><span id="titleIcon"></span>Buscaminas</span>
+          <span class="tb-btns">
+            <button class="tb-btn" disabled aria-hidden="true">_</button>
+            <button class="tb-btn" disabled aria-hidden="true">□</button>
+            <a class="tb-btn" href="../juegos.html" aria-label="Cerrar">×</a>
+          </span>
+        </div>
+
+        <div class="menubar" id="menubar">
+          <div class="menu">
+            <button class="menu-title"><u>J</u>uego</button>
+            <div class="menu-list">
+              <button class="menu-item" data-act="new"><span>Nuevo</span><span>F2</span></button>
+              <hr class="menu-sep" />
+              <button class="menu-item" data-act="level" data-level="beginner">Principiante</button>
+              <button class="menu-item" data-act="level" data-level="intermediate">Intermedio</button>
+              <button class="menu-item" data-act="level" data-level="expert">Experto</button>
+              <button class="menu-item" data-act="custom" data-level="custom">Personalizado...</button>
+              <hr class="menu-sep" />
+              <button class="menu-item" data-act="marks" id="marksItem">Marcas (?)</button>
+              <hr class="menu-sep" />
+              <button class="menu-item" data-act="records">Mejores tiempos...</button>
+              <hr class="menu-sep" />
+              <button class="menu-item" data-act="exit">Salir</button>
+            </div>
+          </div>
+          <div class="menu">
+            <button class="menu-title"><u>A</u>yuda</button>
+            <div class="menu-list">
+              <button class="menu-item" data-act="help">Cómo jugar...</button>
+              <hr class="menu-sep" />
+              <button class="menu-item" data-act="about">Acerca del Buscaminas...</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="ms-body">
+          <div class="ms-head">
+            <div class="led" id="ledMines" aria-label="Minas restantes"></div>
+            <button class="face" id="face" aria-label="Nueva partida"></button>
+            <div class="led" id="ledTime" aria-label="Tiempo"></div>
+          </div>
+          <div class="board-wrap">
+            <div class="board" id="board"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <button class="w-btn flag-mode" id="flagMode" aria-pressed="false"></button>
+
+    <p class="hint">
+      <kbd>Clic izquierdo</kbd> descubrir · <kbd>Clic derecho</kbd> bandera · <kbd>Clic en un número</kbd> despejar alrededor · <kbd>F2</kbd> nueva partida<br />
+      En el móvil: toque para descubrir y pulsación larga para poner bandera.
+    </p>
+  </main>
+
+  <!-- Diálogo: campo personalizado -->
+  <div class="overlay hidden" id="dlgCustom">
+    <div class="win dialog">
+      <div class="titlebar"><span class="ttl">Campo personalizado</span><span class="tb-btns"><button class="tb-btn" data-close>×</button></span></div>
+      <div class="dialog-body">
+        <div class="fieldset">
+          <label class="form-row">Alto (filas): <input class="w-input" type="number" id="cRows" min="9" max="24" /></label>
+          <label class="form-row">Ancho (columnas): <input class="w-input" type="number" id="cCols" min="9" max="30" /></label>
+          <label class="form-row">Minas: <input class="w-input" type="number" id="cMines" min="10" /></label>
+        </div>
+        <p style="color:#444">Filas 9–24 · Columnas 9–30 · Minas 10 hasta (filas−1)×(columnas−1).</p>
+        <div class="dialog-actions">
+          <button class="w-btn" id="cOk">Aceptar</button>
+          <button class="w-btn" data-close>Cancelar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Diálogo: nombre para el récord -->
+  <div class="overlay hidden" id="dlgName">
+    <div class="win dialog">
+      <div class="titlebar"><span class="ttl">¡Nuevo récord!</span></div>
+      <div class="dialog-body">
+        <p id="nameMsg"></p>
+        <input class="w-input" type="text" id="nameInput" maxlength="20" autocomplete="off" />
+        <div class="dialog-actions"><button class="w-btn" id="nameOk">Aceptar</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Diálogo: mejores tiempos -->
+  <div class="overlay hidden" id="dlgRecords">
+    <div class="win dialog wide">
+      <div class="titlebar"><span class="ttl">Mejores tiempos</span><span class="tb-btns"><button class="tb-btn" data-close>×</button></span></div>
+      <div class="dialog-body">
+        <div class="tabs" id="recTabs">
+          <button class="w-btn" data-level="beginner">Principiante</button>
+          <button class="w-btn" data-level="intermediate">Intermedio</button>
+          <button class="w-btn" data-level="expert">Experto</button>
+        </div>
+        <div class="rec-table-wrap" id="recTable"></div>
+        <div class="fieldset stats" id="recStats"></div>
+        <div class="dialog-actions">
+          <button class="w-btn" id="recReset">Restablecer</button>
+          <button class="w-btn" data-close>Aceptar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Diálogo: mensaje genérico (ayuda, acerca de, confirmaciones) -->
+  <div class="overlay hidden" id="dlgMsg">
+    <div class="win dialog wide">
+      <div class="titlebar"><span class="ttl" id="msgTitle"></span><span class="tb-btns"><button class="tb-btn" data-close>×</button></span></div>
+      <div class="dialog-body">
+        <div class="msg-icon"><span id="msgIcon"></span><div id="msgBody"></div></div>
+        <div class="dialog-actions" id="msgActions"></div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="app-footer">
+    <span>✦ Buscaminas</span>
+    <a href="../juegos.html">← Todos los juegos</a>
+  </footer>
+
+  <script>
+    const cur = document.getElementById('cursor'), fol = document.getElementById('cursorFollower');
+    let mx=0,my=0,fx=0,fy=0;
+    document.addEventListener('mousemove', e => { mx=e.clientX; my=e.clientY; cur.style.left=mx+'px'; cur.style.top=my+'px'; });
+    (function loop(){ fx+=(mx-fx)*.12; fy+=(my-fy)*.12; fol.style.left=fx+'px'; fol.style.top=fy+'px'; requestAnimationFrame(loop); })();
+
+    function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+    // ════════ Gráficos (SVG) ════════
+    const SVG_MINE = `<svg viewBox="0 0 16 16"><g stroke="#000" stroke-width="1.4"><line x1="8" y1="1.5" x2="8" y2="14.5"/><line x1="1.5" y1="8" x2="14.5" y2="8"/><line x1="3.4" y1="3.4" x2="12.6" y2="12.6"/><line x1="12.6" y1="3.4" x2="3.4" y2="12.6"/></g><circle cx="8" cy="8" r="4.6" fill="#000"/><rect x="5.6" y="5.6" width="2" height="2" fill="#fff"/></svg>`;
+    const SVG_WRONG = SVG_MINE.replace('</svg>', '<path d="M2 2L14 14M14 2L2 14" stroke="#f00" stroke-width="1.8"/></svg>');
+    const SVG_FLAG = `<svg viewBox="0 0 16 16"><polygon points="9.5,2 9.5,8.5 3.5,5.25" fill="#f00"/><rect x="9" y="2" width="1.3" height="9" fill="#000"/><rect x="6.5" y="10.5" width="6" height="1.5" fill="#000"/><rect x="4.5" y="12" width="10" height="2" fill="#000"/></svg>`;
+
+    const FACE_EYES = '<rect x="8" y="8" width="2" height="2.5"/><rect x="14" y="8" width="2" height="2.5"/>';
+    const FACE_SMILE = '<path d="M7.5 14.5Q12 19 16.5 14.5" fill="none" stroke="#000" stroke-width="1.4"/>';
+    const FACES = {
+      smile: FACE_EYES + FACE_SMILE,
+      ooh:   FACE_EYES + '<ellipse cx="12" cy="16" rx="2" ry="2.5" fill="none" stroke="#000" stroke-width="1.3"/>',
+      dead:  '<path d="M7.5 7.5l3 3m0-3l-3 3M13.5 7.5l3 3m0-3l-3 3" stroke="#000" stroke-width="1.3"/><path d="M7.5 17.5Q12 13 16.5 17.5" fill="none" stroke="#000" stroke-width="1.4"/>',
+      cool:  '<path d="M4.5 9h15" stroke="#000" stroke-width="1.1"/><path d="M6 8.5h5v1.6q0 2.2-2.5 2.2T6 10.1zM13 8.5h5v1.6q0 2.2-2.5 2.2T13 10.1z"/>' + FACE_SMILE,
+    };
+    function faceSvg(kind) {
+      return `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10.4" fill="#ffff00" stroke="#000" stroke-width="1.2"/><g fill="#000">${FACES[kind]}</g></svg>`;
+    }
+
+    // Display LED de 7 segmentos (a b c d e f g)
+    const SEGMENTS = [
+      '2,1 11,1 9,3 4,3',               // a
+      '12,2 12,10.5 11,11.5 10,10.5 10,4', // b
+      '12,12.5 12,21 10,19 10,12.5 11,11.5', // c
+      '2,22 4,20 9,20 11,22',           // d
+      '1,12.5 2,11.5 3,12.5 3,19 1,21', // e
+      '1,2 3,4 3,10.5 2,11.5 1,10.5',   // f
+      '2.2,11.5 3.2,10.5 9.8,10.5 10.8,11.5 9.8,12.5 3.2,12.5', // g
+    ];
+    const DIGITS = { '0':'abcdef', '1':'bc', '2':'abged', '3':'abgcd', '4':'fgbc', '5':'afgcd', '6':'afgedc', '7':'abc', '8':'abcdefg', '9':'abcdfg', '-':'g' };
+    function buildLed(el) {
+      const digit = `<svg viewBox="0 0 13 23">${SEGMENTS.map(p => `<polygon points="${p}"/>`).join('')}</svg>`;
+      el.innerHTML = digit.repeat(3);
+    }
+    function setLed(el, value) {
+      value = Math.max(-99, Math.min(999, value));
+      const str = value < 0 ? '-' + String(-value).padStart(2, '0') : String(value).padStart(3, '0');
+      el.querySelectorAll('svg').forEach((svg, k) => {
+        const on = DIGITS[str[k]];
+        svg.querySelectorAll('polygon').forEach((p, s) => p.classList.toggle('on', on.includes('abcdefg'[s])));
+      });
+    }
+
+    // ════════ Persistencia ════════
+    const LEVELS = {
+      beginner:     { name: 'Principiante', rows: 9,  cols: 9,  mines: 10 },
+      intermediate: { name: 'Intermedio',   rows: 16, cols: 16, mines: 40 },
+      expert:       { name: 'Experto',      rows: 16, cols: 30, mines: 99 },
+    };
+    const MAX_RECORDS = 10;
+    const KEY_PREFS = 'buscaminas.prefs', KEY_RECORDS = 'buscaminas.records', KEY_STATS = 'buscaminas.stats';
+
+    function load(key, fallback) { try { return JSON.parse(localStorage.getItem(key)) || fallback; } catch { return fallback; } }
+    function save(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch {} }
+
+    const prefs = Object.assign({ level: 'beginner', custom: { rows: 20, cols: 24, mines: 80 }, marks: false, lastName: '' }, load(KEY_PREFS, {}));
+    if (!LEVELS[prefs.level] && prefs.level !== 'custom') prefs.level = 'beginner';
+    let records = load(KEY_RECORDS, {});
+    let stats = load(KEY_STATS, {});
+
+    function levelStats(lv) { return stats[lv] || (stats[lv] = { played: 0, won: 0, streak: 0, best: 0 }); }
+
+    // ════════ Estado del juego ════════
+    const HIDDEN = 0, OPEN = 1, FLAG = 2, QUESTION = 3;
+    let R, C, M, cells, status, flags, opened, boomIdx, startT, timerId, elapsedMs;
+    let flagMode = false;
+
+    const boardEl  = document.getElementById('board');
+    const faceEl   = document.getElementById('face');
+    const ledMines = document.getElementById('ledMines');
+    const ledTime  = document.getElementById('ledTime');
+
+    const isOver = () => status === 'won' || status === 'lost';
+    const cfg = () => prefs.level === 'custom' ? prefs.custom : LEVELS[prefs.level];
+
+    function setFace(kind) { faceEl.innerHTML = faceSvg(kind); }
+
+    function neighbors(i) {
+      const r = Math.floor(i / C), c = i % C, out = [];
+      for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) {
+        if (!dr && !dc) continue;
+        const nr = r + dr, nc = c + dc;
+        if (nr >= 0 && nr < R && nc >= 0 && nc < C) out.push(nr * C + nc);
+      }
+      return out;
+    }
+
+    function newGame() {
+      ({ rows: R, cols: C, mines: M } = cfg());
+      cells = Array.from({ length: R * C }, () => ({ mine: false, adj: 0, st: HIDDEN, wrong: false }));
+      status = 'ready'; flags = 0; opened = 0; boomIdx = -1; elapsedMs = 0;
+      stopTimer();
+      setLed(ledTime, 0);
+      setLed(ledMines, M);
+      setFace('smile');
+
+      boardEl.style.gridTemplateColumns = `repeat(${C}, var(--cs))`;
+      boardEl.innerHTML = cells.map((_, i) => `<div class="c" data-i="${i}"></div>`).join('');
+      fitSize();
+      renderLevelUi();
+    }
+
+    // La primera casilla (y sus vecinas, si caben) nunca tiene mina
+    function placeMines(safe) {
+      const excluded = new Set([safe]);
+      if (R * C - 9 >= M) neighbors(safe).forEach(n => excluded.add(n));
+      const pool = [];
+      for (let i = 0; i < R * C; i++) if (!excluded.has(i)) pool.push(i);
+      for (let k = 0; k < M; k++) {
+        const j = k + Math.floor(Math.random() * (pool.length - k));
+        [pool[k], pool[j]] = [pool[j], pool[k]];
+        cells[pool[k]].mine = true;
+      }
+      cells.forEach((cell, i) => { cell.adj = neighbors(i).filter(n => cells[n].mine).length; });
+    }
+
+    function paint(i) {
+      const cell = cells[i], el = boardEl.children[i];
+      if (cell.st === OPEN) {
+        if (cell.mine) { el.className = 'c open' + (i === boomIdx ? ' boom' : ''); el.innerHTML = SVG_MINE; }
+        else { el.className = 'c open n' + cell.adj; el.textContent = cell.adj || ''; }
+      } else if (cell.st === FLAG) {
+        if (cell.wrong) { el.className = 'c open'; el.innerHTML = SVG_WRONG; }
+        else { el.className = 'c'; el.innerHTML = SVG_FLAG; }
+      } else if (cell.st === QUESTION) {
+        el.className = 'c q'; el.textContent = '?';
+      } else {
+        el.className = 'c'; el.textContent = '';
+      }
+    }
+
+    function startTimer() {
+      startT = performance.now();
+      setLed(ledTime, 1);
+      timerId = setInterval(() => setLed(ledTime, Math.floor((performance.now() - startT) / 1000) + 1), 200);
+    }
+    function stopTimer() {
+      if (timerId) { clearInterval(timerId); timerId = null; elapsedMs = performance.now() - startT; }
+    }
+
+    function reveal(i) {
+      if (isOver()) return;
+      const cell = cells[i];
+      if (cell.st === OPEN || cell.st === FLAG) return;
+      if (status === 'ready') {
+        placeMines(i);
+        status = 'playing';
+        startTimer();
+        levelStats(prefs.level).played++;
+        save(KEY_STATS, stats);
+      }
+      if (cell.mine) { boomIdx = i; lose(); return; }
+      flood(i);
+      if (opened === R * C - M) win();
+    }
+
+    function flood(start) {
+      const stack = [start];
+      while (stack.length) {
+        const j = stack.pop(), cell = cells[j];
+        if (cell.st === OPEN || cell.st === FLAG) continue;
+        cell.st = OPEN; opened++;
+        paint(j);
+        if (cell.adj === 0) neighbors(j).forEach(n => { if (cells[n].st !== OPEN && cells[n].st !== FLAG) stack.push(n); });
+      }
+    }
+
+    // Clic en un número con tantas banderas alrededor como indica: descubre el resto
+    function chord(i) {
+      const cell = cells[i];
+      if (status !== 'playing' || cell.st !== OPEN || !cell.adj) return;
+      const nb = neighbors(i);
+      if (nb.filter(n => cells[n].st === FLAG).length !== cell.adj) return;
+      for (const n of nb) {
+        const c = cells[n];
+        if (c.st === HIDDEN || c.st === QUESTION) {
+          if (c.mine) { boomIdx = n; lose(); return; }
+          flood(n);
+        }
+      }
+      if (opened === R * C - M) win();
+    }
+
+    function toggleFlag(i) {
+      if (isOver()) return;
+      const cell = cells[i];
+      if (cell.st === OPEN) return;
+      if (cell.st === HIDDEN) { cell.st = FLAG; flags++; }
+      else if (cell.st === FLAG) { cell.st = prefs.marks ? QUESTION : HIDDEN; flags--; }
+      else cell.st = HIDDEN;
+      paint(i);
+      setLed(ledMines, M - flags);
+    }
+
+    function lose() {
+      status = 'lost';
+      stopTimer();
+      cells.forEach((cell, i) => {
+        if (cell.mine && cell.st !== FLAG) cell.st = OPEN;
+        else if (!cell.mine && cell.st === FLAG) cell.wrong = true;
+        paint(i);
+      });
+      setFace('dead');
+      levelStats(prefs.level).streak = 0;
+      save(KEY_STATS, stats);
+    }
+
+    function win() {
+      status = 'won';
+      stopTimer();
+      cells.forEach((cell, i) => { if (cell.mine && cell.st !== FLAG) { cell.st = FLAG; paint(i); } });
+      flags = M;
+      setLed(ledMines, 0);
+      setFace('cool');
+
+      const st = levelStats(prefs.level);
+      st.won++; st.streak++; st.best = Math.max(st.best, st.streak);
+      save(KEY_STATS, stats);
+
+      if (prefs.level === 'custom') return;
+      const list = records[prefs.level] || [];
+      const pos = list.filter(r => r.ms <= elapsedMs).length;
+      if (pos < MAX_RECORDS) setTimeout(() => askName(pos), 500);
+    }
+
+    // ════════ Tamaño de casilla según el espacio disponible ════════
+    const desktopEl = document.getElementById('desktop');
+    function fitSize() {
+      const avail = desktopEl.clientWidth - parseFloat(getComputedStyle(desktopEl).paddingLeft) * 2 - 30;
+      const cs = Math.max(20, Math.min(30, Math.floor(avail / C)));
+      boardEl.style.setProperty('--cs', cs + 'px');
+    }
+    window.addEventListener('resize', () => { if (C) fitSize(); });
+
+    // ════════ Ratón y táctil ════════
+    let mouseDown = null; // { middle: bool }
+    let pressed = [];
+    let touch = null;
+
+    function cellIndex(target) {
+      const el = target && target.closest ? target.closest('.c') : null;
+      return el && boardEl.contains(el) ? +el.dataset.i : -1;
+    }
+
+    function clearPress() { pressed.forEach(j => boardEl.children[j].classList.remove('pressed')); pressed = []; }
+    function press(i, middle) {
+      clearPress();
+      if (i < 0 || isOver()) return;
+      const cell = cells[i], hidden = j => cells[j].st === HIDDEN || cells[j].st === QUESTION;
+      if (cell.st === OPEN) { if (cell.adj) pressed = neighbors(i).filter(hidden); }
+      else if (middle) pressed = [i, ...neighbors(i)].filter(hidden);
+      else if (cell.st !== FLAG) pressed = [i];
+      pressed.forEach(j => boardEl.children[j].classList.add('pressed'));
+    }
+
+    boardEl.addEventListener('contextmenu', e => e.preventDefault());
+
+    boardEl.addEventListener('pointerdown', e => {
+      const i = cellIndex(e.target);
+      if (i < 0 || isOver()) return;
+      if (e.pointerType !== 'mouse') {
+        touch = { i, x: e.clientX, y: e.clientY, done: false, timer: setTimeout(() => {
+          touch.done = true; clearPress(); toggleFlag(i); navigator.vibrate?.(25);
+        }, 380) };
+        press(i, false);
+        return;
+      }
+      if (e.button === 2) { if (!mouseDown) toggleFlag(i); return; }
+      if (e.button === 0 || e.button === 1) {
+        e.preventDefault();
+        mouseDown = { middle: e.button === 1 };
+        setFace('ooh');
+        press(i, mouseDown.middle);
+      }
+    });
+
+    boardEl.addEventListener('pointermove', e => {
+      if (e.pointerType === 'mouse') { if (mouseDown) press(cellIndex(e.target), mouseDown.middle); return; }
+      if (touch && Math.hypot(e.clientX - touch.x, e.clientY - touch.y) > 10) cancelTouch();
+    });
+    boardEl.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') clearPress(); });
+    boardEl.addEventListener('pointercancel', cancelTouch);
+
+    function cancelTouch() { if (touch) { clearTimeout(touch.timer); touch = null; clearPress(); } }
+
+    document.addEventListener('pointerup', e => {
+      if (e.pointerType === 'mouse') {
+        if (!mouseDown) return;
+        const { middle } = mouseDown;
+        mouseDown = null;
+        clearPress();
+        if (!isOver()) setFace('smile');
+        const i = cellIndex(e.target);
+        if (i < 0) return;
+        if (cells[i].st === OPEN || middle) chord(i);
+        else reveal(i);
+        return;
+      }
+      if (!touch) return;
+      const { i, done, timer } = touch;
+      clearTimeout(timer); touch = null; clearPress();
+      if (done) return;
+      if (cells[i].st === OPEN) chord(i);
+      else if (flagMode) toggleFlag(i);
+      else reveal(i);
+    });
+
+    faceEl.addEventListener('click', newGame);
+
+    const flagModeEl = document.getElementById('flagMode');
+    function renderFlagMode() {
+      flagModeEl.innerHTML = SVG_FLAG + (flagMode ? 'Modo bandera: activado' : 'Modo bandera: desactivado');
+      flagModeEl.classList.toggle('on', flagMode);
+      flagModeEl.setAttribute('aria-pressed', flagMode);
+    }
+    flagModeEl.addEventListener('click', () => { flagMode = !flagMode; renderFlagMode(); });
+
+    // ════════ Niveles ════════
+    function setLevel(level) {
+      prefs.level = level;
+      save(KEY_PREFS, prefs);
+      newGame();
+    }
+
+    function renderLevelUi() {
+      document.querySelectorAll('#levels .level-btn').forEach(b => b.classList.toggle('active', b.dataset.level === prefs.level));
+      document.querySelectorAll('.menu-item[data-level]').forEach(b => b.classList.toggle('checked', b.dataset.level === prefs.level));
+      document.getElementById('marksItem').classList.toggle('checked', prefs.marks);
+      const c = prefs.custom;
+      document.getElementById('customLabel').textContent = `${c.cols}×${c.rows} · ${c.mines}`;
+    }
+
+    document.getElementById('levels').addEventListener('click', e => {
+      const b = e.target.closest('.level-btn');
+      if (!b) return;
+      if (b.dataset.level === 'custom') openCustom();
+      else setLevel(b.dataset.level);
+    });
+
+    // ════════ Diálogos ════════
+    function openDialog(id) { closeMenus(); document.getElementById(id).classList.remove('hidden'); }
+    function closeDialog(id) { document.getElementById(id).classList.add('hidden'); }
+    const anyDialogOpen = () => !!document.querySelector('.overlay:not(.hidden)');
+
+    document.querySelectorAll('.overlay').forEach(ov => {
+      ov.addEventListener('click', e => { if (e.target.closest('[data-close]')) ov.classList.add('hidden'); });
+    });
+
+    function openCustom() {
+      const c = prefs.custom;
+      document.getElementById('cRows').value = c.rows;
+      document.getElementById('cCols').value = c.cols;
+      document.getElementById('cMines').value = c.mines;
+      openDialog('dlgCustom');
+      document.getElementById('cRows').focus();
+    }
+
+    function applyCustom() {
+      const clamp = (v, lo, hi, def) => { v = parseInt(v, 10); return Number.isFinite(v) ? Math.max(lo, Math.min(hi, v)) : def; };
+      const rows = clamp(document.getElementById('cRows').value, 9, 24, 16);
+      const cols = clamp(document.getElementById('cCols').value, 9, 30, 16);
+      const mines = clamp(document.getElementById('cMines').value, 10, (rows - 1) * (cols - 1), 40);
+      prefs.custom = { rows, cols, mines };
+      closeDialog('dlgCustom');
+      setLevel('custom');
+    }
+    document.getElementById('cOk').addEventListener('click', applyCustom);
+    document.getElementById('dlgCustom').addEventListener('keydown', e => { if (e.key === 'Enter') applyCustom(); });
+
+    // Récords
+    let lastRecord = null; // { level, ts } para resaltar la fila recién añadida
+    const fmtTime = ms => (ms / 1000).toFixed(2).replace('.', ',') + ' s';
+
+    function askName(pos) {
+      document.getElementById('nameMsg').innerHTML =
+        `Has conseguido el <b>${pos + 1}º mejor tiempo</b> en nivel <b>${LEVELS[prefs.level].name}</b>: <b>${fmtTime(elapsedMs)}</b>.<br>Escribe tu nombre:`;
+      const input = document.getElementById('nameInput');
+      input.value = prefs.lastName || 'Anónimo';
+      openDialog('dlgName');
+      input.focus(); input.select();
+    }
+
+    function saveRecord() {
+      const name = document.getElementById('nameInput').value.trim() || 'Anónimo';
+      prefs.lastName = name;
+      save(KEY_PREFS, prefs);
+      const ts = Date.now();
+      const list = (records[prefs.level] || []).concat({ name, ms: Math.round(elapsedMs), ts });
+      list.sort((a, b) => a.ms - b.ms);
+      records[prefs.level] = list.slice(0, MAX_RECORDS);
+      save(KEY_RECORDS, records);
+      lastRecord = { level: prefs.level, ts };
+      closeDialog('dlgName');
+      openRecords(prefs.level);
+    }
+    document.getElementById('nameOk').addEventListener('click', saveRecord);
+    document.getElementById('nameInput').addEventListener('keydown', e => { if (e.key === 'Enter') saveRecord(); });
+
+    let recLevel = 'beginner';
+    function openRecords(level) {
+      recLevel = LEVELS[level] ? level : 'beginner';
+      renderRecords();
+      openDialog('dlgRecords');
+    }
+
+    function renderRecords() {
+      document.querySelectorAll('#recTabs .w-btn').forEach(b => b.classList.toggle('on', b.dataset.level === recLevel));
+      const list = records[recLevel] || [];
+      document.getElementById('recTable').innerHTML = list.length
+        ? `<table class="rec-table"><thead><tr><th>#</th><th>Nombre</th><th>Tiempo</th><th>Fecha</th></tr></thead><tbody>${
+            list.map((r, k) => `<tr class="${lastRecord && lastRecord.level === recLevel && lastRecord.ts === r.ts ? 'new' : ''}">
+              <td class="num">${k + 1}</td><td class="name">${escHtml(r.name)}</td><td class="num">${fmtTime(r.ms)}</td>
+              <td>${new Date(r.ts).toLocaleDateString('es-ES')}</td></tr>`).join('')
+          }</tbody></table>`
+        : '<div class="rec-empty">Todavía no hay tiempos en este nivel.</div>';
+
+      const s = levelStats(recLevel);
+      const pct = s.played ? Math.round(s.won / s.played * 100) : 0;
+      document.getElementById('recStats').innerHTML = `
+        <span>Partidas jugadas: <b>${s.played}</b></span><span>Partidas ganadas: <b>${s.won}</b> (${pct}%)</span>
+        <span>Racha actual: <b>${s.streak}</b></span><span>Mejor racha: <b>${s.best}</b></span>`;
+    }
+
+    document.getElementById('recTabs').addEventListener('click', e => {
+      const b = e.target.closest('.w-btn');
+      if (b) { recLevel = b.dataset.level; renderRecords(); }
+    });
+
+    document.getElementById('recReset').addEventListener('click', () => {
+      showMessage('Buscaminas', `¿Seguro que quieres borrar los mejores tiempos y las estadísticas del nivel <b>${LEVELS[recLevel].name}</b>?`, [
+        { label: 'Sí', action: () => {
+          delete records[recLevel]; delete stats[recLevel];
+          save(KEY_RECORDS, records); save(KEY_STATS, stats);
+          renderRecords();
+        } },
+        { label: 'No' },
+      ], 'warn');
+    });
+
+    // Mensajes genéricos
+    const ICONS = {
+      info: '<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" fill="#fff" stroke="#000"/><rect x="14" y="13" width="4" height="11" fill="#00f"/><circle cx="16" cy="9" r="2.2" fill="#00f"/></svg>',
+      warn: '<svg viewBox="0 0 32 32"><polygon points="16,2 31,29 1,29" fill="#ff0" stroke="#000"/><rect x="14.5" y="10" width="3" height="11" fill="#000"/><rect x="14.5" y="23" width="3" height="3" fill="#000"/></svg>',
+    };
+    function showMessage(title, html, buttons = [{ label: 'Aceptar' }], icon = 'info') {
+      document.getElementById('msgTitle').textContent = title;
+      document.getElementById('msgIcon').innerHTML = ICONS[icon];
+      document.getElementById('msgBody').innerHTML = html;
+      const actions = document.getElementById('msgActions');
+      actions.innerHTML = '';
+      buttons.forEach(b => {
+        const btn = document.createElement('button');
+        btn.className = 'w-btn'; btn.textContent = b.label;
+        btn.addEventListener('click', () => { closeDialog('dlgMsg'); b.action?.(); });
+        actions.appendChild(btn);
+      });
+      openDialog('dlgMsg');
+      actions.firstChild.focus();
+    }
+
+    const helpHtml = () => `
+      <p>Descubre todas las casillas que no tienen mina. Cada número indica cuántas minas hay en las 8 casillas que lo rodean.</p>
+      <ul style="margin:8px 0 0 18px;display:flex;flex-direction:column;gap:3px">
+        <li><b>Clic izquierdo:</b> descubre una casilla.</li>
+        <li><b>Clic derecho:</b> pone o quita una bandera${prefs.marks ? ' (o una marca ?)' : ''}.</li>
+        <li><b>Clic en un número</b> (o clic central): si ya tiene alrededor tantas banderas como indica, descubre el resto de vecinas.</li>
+        <li><b>Móvil:</b> toque para descubrir, pulsación larga para bandera, o activa el modo bandera.</li>
+        <li>El primer clic nunca es una mina. El tiempo empieza a contar con él.</li>
+        <li>Pulsa la carita o <b>F2</b> para empezar de nuevo.</li>
+      </ul>`;
+
+    // ════════ Menús ════════
+    const menubar = document.getElementById('menubar');
+    function closeMenus() { menubar.querySelectorAll('.menu.open').forEach(m => m.classList.remove('open')); }
+
+    menubar.addEventListener('click', e => {
+      const title = e.target.closest('.menu-title');
+      if (title) {
+        const menu = title.parentElement, wasOpen = menu.classList.contains('open');
+        closeMenus();
+        if (!wasOpen) menu.classList.add('open');
+        return;
+      }
+      const item = e.target.closest('.menu-item');
+      if (!item) return;
+      closeMenus();
+      switch (item.dataset.act) {
+        case 'new': newGame(); break;
+        case 'level': setLevel(item.dataset.level); break;
+        case 'custom': openCustom(); break;
+        case 'marks':
+          prefs.marks = !prefs.marks; save(KEY_PREFS, prefs); renderLevelUi();
+          if (!prefs.marks && cells) cells.forEach((c, i) => { if (c.st === QUESTION) { c.st = HIDDEN; paint(i); } });
+          break;
+        case 'records': openRecords(prefs.level); break;
+        case 'exit': location.href = '../juegos.html'; break;
+        case 'help': showMessage('Cómo jugar', helpHtml()); break;
+        case 'about': showMessage('Acerca del Buscaminas', '<p><b>Buscaminas</b></p><p>Homenaje al clásico de Windows, hecho a mano en HTML, CSS y JavaScript.</p><p style="margin-top:6px">Los tiempos y estadísticas se guardan en este navegador.</p>'); break;
+      }
+    });
+    // Con un menú abierto, pasar por encima de otro título lo abre
+    menubar.querySelectorAll('.menu-title').forEach(t => t.addEventListener('pointerenter', () => {
+      if (menubar.querySelector('.menu.open') && !t.parentElement.classList.contains('open')) { closeMenus(); t.parentElement.classList.add('open'); }
+    }));
+    document.addEventListener('pointerdown', e => { if (!menubar.contains(e.target)) closeMenus(); });
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'F2') { e.preventDefault(); if (!anyDialogOpen()) newGame(); }
+      if (e.key === 'Escape') {
+        closeMenus();
+        document.querySelectorAll('.overlay:not(.hidden)').forEach(ov => { if (ov.id !== 'dlgName') ov.classList.add('hidden'); });
+      }
+    });
+
+    // ════════ Inicio ════════
+    document.getElementById('titleIcon').innerHTML = SVG_MINE.replace('<svg', '<svg style="background:#c0c0c0"');
+    buildLed(ledMines);
+    buildLed(ledTime);
+    renderFlagMode();
+    newGame();
+
+    document.body.style.opacity='0'; document.body.style.transition='opacity .4s ease';
+    window.addEventListener('load', () => { document.body.style.opacity='1'; });
+  </script>
+</body>
+</html>

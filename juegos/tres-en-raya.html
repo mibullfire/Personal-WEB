@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>3 en raya — Miguel Toro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@1,700&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="../img/web-icon.png" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --black: #0a0a0a; --dark: #111111; --dark2: #1a1a1a;
+      --white: #f5f5f5; --white2: #e0e0e0; --gray: #888; --gray2: #444;
+      --accent: #ff4dab; --accent2: #ff1a96; --radius: 12px; --radius-lg: 16px;
+      --x: #ff4dab; --o: #6fd3ff;
+    }
+    html { font-size: 16px; }
+    body { background: var(--black); color: var(--white); font-family: 'Inter', sans-serif; overflow-x: hidden; cursor: none; min-height: 100vh; display: flex; flex-direction: column; }
+    a { text-decoration: none; color: inherit; }
+    button { cursor: none; font-family: inherit; border: none; outline: none; }
+
+    .cursor { width: 10px; height: 10px; background: var(--accent); border-radius: 50%; position: fixed; top: 0; left: 0; pointer-events: none; z-index: 9999; transform: translate(-50%,-50%); transition: width .3s, height .3s; }
+    .cursor-follower { width: 36px; height: 36px; border: 1.5px solid rgba(255,77,171,.4); border-radius: 50%; position: fixed; top: 0; left: 0; pointer-events: none; z-index: 9998; transform: translate(-50%,-50%); transition: transform .15s ease, width .3s, height .3s, border-color .3s; }
+    body:has(a:hover) .cursor, body:has(button:hover) .cursor { width: 16px; height: 16px; }
+    body:has(a:hover) .cursor-follower, body:has(button:hover) .cursor-follower { width: 56px; height: 56px; border-color: rgba(255,77,171,.8); }
+    @media (pointer: coarse) { body { cursor: auto; } button { cursor: auto; } .cursor, .cursor-follower { display: none; } }
+
+    .app-nav { position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 1.1rem 2.5rem; background: rgba(10,10,10,.9); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,.06); }
+    .app-nav-logo { display: flex; align-items: center; gap: .6rem; font-weight: 700; font-size: .95rem; letter-spacing: -.02em; }
+    .app-nav-star { color: var(--accent); animation: navSpin 8s linear infinite; }
+    @keyframes navSpin { to { transform: rotate(360deg); } }
+    .app-nav-back { font-size: .82rem; font-weight: 600; color: var(--gray); padding: .45rem 1rem; border: 1px solid rgba(255,255,255,.09); border-radius: 100px; transition: color .3s, border-color .3s, background .3s; }
+    .app-nav-back:hover { color: var(--accent); border-color: rgba(255,77,171,.3); background: rgba(255,77,171,.05); }
+
+    .tool-main { flex: 1; max-width: 560px; width: 100%; margin: 0 auto; padding: 3rem 2rem 5rem; display: flex; flex-direction: column; align-items: center; gap: 2rem; }
+    .tool-title-row { display: flex; align-items: center; gap: 1rem; margin-bottom: .4rem; width: 100%; }
+    .tool-icon { font-size: 1.8rem; font-weight: 900; color: var(--accent); background: rgba(255,77,171,.08); border: 1px solid rgba(255,77,171,.2); padding: .3rem .75rem; border-radius: var(--radius); line-height: 1.3; }
+    .tool-title { font-size: clamp(1.6rem,4vw,2.4rem); font-weight: 900; letter-spacing: -.04em; }
+    .tool-subtitle { font-size: .92rem; color: var(--gray); width: 100%; }
+
+    .hidden { display: none !important; }
+
+    /* ── Setup ── */
+    .setup { width: 100%; display: flex; flex-direction: column; gap: 1.2rem; animation: fadeIn .3s ease; }
+    .player-card { background: var(--dark2); border: 1px solid rgba(255,255,255,.06); border-radius: var(--radius-lg); padding: 1.2rem; display: flex; flex-direction: column; gap: .9rem; }
+    .player-label { font-size: .75rem; font-weight: 600; text-transform: uppercase; letter-spacing: .1em; color: var(--gray); }
+    .name-input { width: 100%; background: var(--dark); color: var(--white2); border: 1px solid rgba(255,255,255,.1); border-radius: var(--radius); padding: .85rem 1rem; font-size: .95rem; outline: none; transition: border-color .3s; font-family: inherit; }
+    .name-input:focus { border-color: rgba(255,77,171,.4); }
+    .name-input::placeholder { color: var(--gray2); }
+    .mark-picker { display: flex; gap: .6rem; }
+    .mark-btn { flex: 1; display: flex; align-items: center; justify-content: center; gap: .5rem; background: var(--dark); color: var(--gray); border: 1px solid rgba(255,255,255,.08); border-radius: var(--radius); padding: .65rem; font-size: .88rem; font-weight: 700; transition: color .3s, border-color .3s, background .3s; }
+    .mark-btn svg { width: 22px; height: 22px; }
+    .mark-btn:hover { color: var(--white); border-color: rgba(255,255,255,.2); }
+    .mark-btn.active[data-mark="X"] { color: var(--x); border-color: rgba(255,77,171,.5); background: rgba(255,77,171,.08); }
+    .mark-btn.active[data-mark="O"] { color: var(--o); border-color: rgba(111,211,255,.5); background: rgba(111,211,255,.08); }
+
+    .btn-primary { background: var(--accent); color: var(--black); border-radius: 100px; padding: .9rem 2.5rem; font-size: 1rem; font-weight: 800; letter-spacing: -.02em; transition: background .3s, transform .15s, box-shadow .3s; align-self: center; }
+    .btn-primary:hover { background: var(--accent2); transform: translateY(-2px); box-shadow: 0 8px 28px rgba(255,77,171,.3); }
+    .btn-primary:active { transform: translateY(0); }
+    .btn-ghost { background: transparent; color: var(--gray); border: 1px solid rgba(255,255,255,.09); border-radius: 100px; padding: .7rem 1.4rem; font-size: .85rem; font-weight: 600; transition: color .3s, border-color .3s; }
+    .btn-ghost:hover { color: var(--white); border-color: rgba(255,255,255,.2); }
+
+    /* ── Game ── */
+    .game { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 1.6rem; animation: fadeIn .3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+    .scoreboard { width: 100%; display: grid; grid-template-columns: 1fr auto 1fr; gap: .7rem; align-items: stretch; }
+    .score-player { background: var(--dark2); border: 1px solid rgba(255,255,255,.06); border-radius: var(--radius-lg); padding: .8rem 1rem; display: flex; flex-direction: column; gap: .2rem; min-width: 0; transition: border-color .3s, box-shadow .3s; }
+    .score-player.turn[data-mark="X"] { border-color: rgba(255,77,171,.55); box-shadow: 0 0 0 3px rgba(255,77,171,.08); }
+    .score-player.turn[data-mark="O"] { border-color: rgba(111,211,255,.55); box-shadow: 0 0 0 3px rgba(111,211,255,.08); }
+    .score-name { display: flex; align-items: center; gap: .45rem; font-size: .88rem; font-weight: 700; overflow: hidden; }
+    .score-name span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .score-name svg { width: 16px; height: 16px; flex-shrink: 0; }
+    .score-num { font-size: 1.8rem; font-weight: 900; letter-spacing: -.04em; }
+    .score-draws { background: var(--dark2); border: 1px solid rgba(255,255,255,.06); border-radius: var(--radius-lg); padding: .8rem 1rem; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .2rem; }
+    .score-draws .score-label { font-size: .7rem; font-weight: 600; text-transform: uppercase; letter-spacing: .1em; color: var(--gray); }
+    .score-draws .score-num { color: var(--gray); }
+
+    .status { font-size: 1.05rem; font-weight: 700; text-align: center; min-height: 1.6em; letter-spacing: -.01em; }
+    .status .who-X { color: var(--x); }
+    .status .who-O { color: var(--o); }
+
+    .board { position: relative; width: min(360px, 84vw); aspect-ratio: 1; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); }
+    .cell { background: transparent; position: relative; display: flex; align-items: center; justify-content: center; transition: background .25s; }
+    .cell:nth-child(-n+6) { border-bottom: 2px solid rgba(255,255,255,.12); }
+    .cell:not(:nth-child(3n)) { border-right: 2px solid rgba(255,255,255,.12); }
+    .board.playing .cell:empty:hover { background: rgba(255,255,255,.03); }
+    .cell svg { width: 68%; height: 68%; overflow: visible; }
+    .cell.win svg { animation: winPulse .9s ease .1s 2; }
+    @keyframes winPulse { 50% { transform: scale(1.12); } }
+
+    /* Trazo animado: cada línea se "pinta" con stroke-dashoffset */
+    .mark-x line, .mark-o circle { fill: none; stroke-width: 10; stroke-linecap: round; }
+    .mark-x line { stroke: var(--x); stroke-dasharray: 100; stroke-dashoffset: 100; animation: draw .22s ease-out forwards; filter: drop-shadow(0 0 6px rgba(255,77,171,.45)); }
+    .mark-x line:nth-child(2) { animation-delay: .2s; }
+    .mark-o circle { stroke: var(--o); stroke-dasharray: 100; stroke-dashoffset: 100; animation: draw .45s ease-out forwards; filter: drop-shadow(0 0 6px rgba(111,211,255,.45)); transform: rotate(-90deg); transform-origin: center; }
+    @keyframes draw { to { stroke-dashoffset: 0; } }
+    /* En los selectores y el marcador la ficha aparece ya dibujada */
+    .static line, .static circle { animation: none !important; stroke-dashoffset: 0 !important; filter: none !important; }
+
+    .win-line { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+    .win-line line { stroke: var(--white); stroke-width: .06; stroke-linecap: round; stroke-dasharray: 100; stroke-dashoffset: 100; animation: draw .4s ease-out .35s forwards; opacity: .9; }
+
+    .game-actions { display: flex; gap: .7rem; flex-wrap: wrap; justify-content: center; }
+
+    .toast { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(16px); background: var(--accent); color: var(--black); padding: .55rem 1.4rem; border-radius: 100px; font-size: .85rem; font-weight: 700; opacity: 0; pointer-events: none; z-index: 1000; white-space: nowrap; transition: opacity .25s, transform .25s; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    .app-footer { display: flex; align-items: center; justify-content: space-between; padding: 1.4rem 2.5rem; border-top: 1px solid rgba(255,255,255,.06); font-size: .8rem; color: var(--gray); }
+    .app-footer a { color: var(--gray); font-weight: 600; transition: color .3s; }
+    .app-footer a:hover { color: var(--accent); }
+
+    @media (prefers-reduced-motion: reduce) { .mark-x line, .mark-o circle, .win-line line { animation-duration: .01s !important; animation-delay: 0s !important; } }
+    @media (max-width: 600px) { .app-nav { padding: 1rem 1.2rem; } .tool-main { padding: 2rem 1.2rem 4rem; } .app-footer { flex-direction: column; gap: .5rem; text-align: center; padding: 1.2rem; } .score-player, .score-draws { padding: .7rem .75rem; } }
+  </style>
+</head>
+<body>
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-follower" id="cursorFollower"></div>
+
+  <nav class="app-nav">
+    <a href="../index.html" class="app-nav-logo"><span class="app-nav-star">✦</span><span>Miguel Toro</span></a>
+    <a href="../juegos.html" class="app-nav-back">← Juegos</a>
+  </nav>
+
+  <main class="tool-main">
+    <div style="width:100%">
+      <div class="tool-title-row"><span class="tool-icon">#</span><h1 class="tool-title">3 en raya</h1></div>
+      <p class="tool-subtitle">Dos jugadores, un tablero. El primer turno lo decide el azar.</p>
+    </div>
+
+    <!-- Configuración de jugadores -->
+    <section class="setup" id="setup">
+      <div class="player-card">
+        <span class="player-label">Jugador 1</span>
+        <input type="text" id="name0" class="name-input" placeholder="Nombre del jugador 1" maxlength="20" autocomplete="off" />
+        <div class="mark-picker" data-player="0">
+          <button type="button" class="mark-btn" data-mark="X"></button>
+          <button type="button" class="mark-btn" data-mark="O"></button>
+        </div>
+      </div>
+      <div class="player-card">
+        <span class="player-label">Jugador 2</span>
+        <input type="text" id="name1" class="name-input" placeholder="Nombre del jugador 2" maxlength="20" autocomplete="off" />
+        <div class="mark-picker" data-player="1">
+          <button type="button" class="mark-btn" data-mark="X"></button>
+          <button type="button" class="mark-btn" data-mark="O"></button>
+        </div>
+      </div>
+      <button class="btn-primary" id="btnStart">Empezar partida</button>
+    </section>
+
+    <!-- Partida -->
+    <section class="game hidden" id="game">
+      <div class="scoreboard">
+        <div class="score-player" id="score0"><div class="score-name"></div><div class="score-num">0</div></div>
+        <div class="score-draws"><span class="score-label">Empates</span><div class="score-num" id="draws">0</div></div>
+        <div class="score-player" id="score1"><div class="score-name"></div><div class="score-num">0</div></div>
+      </div>
+
+      <p class="status" id="status"></p>
+
+      <div class="board" id="board">
+        <button class="cell" data-i="0" aria-label="Casilla 1"></button>
+        <button class="cell" data-i="1" aria-label="Casilla 2"></button>
+        <button class="cell" data-i="2" aria-label="Casilla 3"></button>
+        <button class="cell" data-i="3" aria-label="Casilla 4"></button>
+        <button class="cell" data-i="4" aria-label="Casilla 5"></button>
+        <button class="cell" data-i="5" aria-label="Casilla 6"></button>
+        <button class="cell" data-i="6" aria-label="Casilla 7"></button>
+        <button class="cell" data-i="7" aria-label="Casilla 8"></button>
+        <button class="cell" data-i="8" aria-label="Casilla 9"></button>
+      </div>
+
+      <div class="game-actions">
+        <button class="btn-primary hidden" id="btnNext">Siguiente partida</button>
+        <button class="btn-ghost" id="btnRestart">Reiniciar tablero</button>
+        <button class="btn-ghost" id="btnPlayers">Cambiar jugadores</button>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast"></div>
+
+  <footer class="app-footer">
+    <span>✦ 3 en raya</span>
+    <a href="../juegos.html">← Todos los juegos</a>
+  </footer>
+
+  <script>
+    const cur = document.getElementById('cursor'), fol = document.getElementById('cursorFollower');
+    let mx=0,my=0,fx=0,fy=0;
+    document.addEventListener('mousemove', e => { mx=e.clientX; my=e.clientY; cur.style.left=mx+'px'; cur.style.top=my+'px'; });
+    (function loop(){ fx+=(mx-fx)*.12; fy+=(my-fy)*.12; fol.style.left=fx+'px'; fol.style.top=fy+'px'; requestAnimationFrame(loop); })();
+
+    function showToast(msg) { const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2000); }
+
+    // pathLength="100" permite animar cualquier trazo con stroke-dasharray: 100
+    function markSvg(mark, isStatic) {
+      const cls = (mark === 'X' ? 'mark-x' : 'mark-o') + (isStatic ? ' static' : '');
+      return mark === 'X'
+        ? `<svg class="${cls}" viewBox="0 0 100 100"><line x1="18" y1="18" x2="82" y2="82" pathLength="100"/><line x1="82" y1="18" x2="18" y2="82" pathLength="100"/></svg>`
+        : `<svg class="${cls}" viewBox="0 0 100 100"><circle cx="50" cy="50" r="33" pathLength="100"/></svg>`;
+    }
+
+    function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+    const LINES = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+    const STORAGE_KEY = 'tresEnRaya.jugadores';
+
+    // players[i] = { name, mark }; marks[0] y marks[1] siempre son distintos
+    let players = [{ name: '', mark: 'X' }, { name: '', mark: 'O' }];
+    let score = [0, 0], draws = 0;
+    let board, turn, over;
+
+    const setupEl  = document.getElementById('setup');
+    const gameEl   = document.getElementById('game');
+    const boardEl  = document.getElementById('board');
+    const statusEl = document.getElementById('status');
+    const btnNext  = document.getElementById('btnNext');
+    const cells    = [...boardEl.querySelectorAll('.cell')];
+
+    // ── Setup ──
+    document.querySelectorAll('.mark-btn').forEach(b => {
+      b.innerHTML = markSvg(b.dataset.mark, true) + (b.dataset.mark === 'X' ? 'Equis' : 'Círculo');
+    });
+
+    function setMark(playerIdx, mark) {
+      players[playerIdx].mark = mark;
+      players[1 - playerIdx].mark = mark === 'X' ? 'O' : 'X';
+      renderPickers();
+    }
+
+    function renderPickers() {
+      document.querySelectorAll('.mark-picker').forEach(p => {
+        const mark = players[+p.dataset.player].mark;
+        p.querySelectorAll('.mark-btn').forEach(b => b.classList.toggle('active', b.dataset.mark === mark));
+      });
+    }
+
+    document.querySelectorAll('.mark-picker').forEach(p => {
+      p.addEventListener('click', e => {
+        const b = e.target.closest('.mark-btn');
+        if (b) setMark(+p.dataset.player, b.dataset.mark);
+      });
+    });
+
+    function loadPlayers() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        if (saved && saved.length === 2) {
+          players = saved.map(p => ({ name: String(p.name || ''), mark: p.mark === 'O' ? 'O' : 'X' }));
+          if (players[0].mark === players[1].mark) players[1].mark = players[0].mark === 'X' ? 'O' : 'X';
+        }
+      } catch {}
+      document.getElementById('name0').value = players[0].name;
+      document.getElementById('name1').value = players[1].name;
+      renderPickers();
+    }
+
+    function savePlayers() {
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(players)); } catch {}
+    }
+
+    function startMatch() {
+      const n0 = document.getElementById('name0').value.trim() || 'Jugador 1';
+      const n1 = document.getElementById('name1').value.trim() || 'Jugador 2';
+      if (n0.toLowerCase() === n1.toLowerCase()) { showToast('Los nombres tienen que ser distintos'); return; }
+      players[0].name = n0;
+      players[1].name = n1;
+      savePlayers();
+      score = [0, 0]; draws = 0;
+      setupEl.classList.add('hidden');
+      gameEl.classList.remove('hidden');
+      renderScore();
+      newRound();
+    }
+
+    function backToSetup() {
+      gameEl.classList.add('hidden');
+      setupEl.classList.remove('hidden');
+      document.getElementById('name0').focus();
+    }
+
+    // ── Partida ──
+    function newRound() {
+      board = Array(9).fill(null);
+      over = false;
+      turn = Math.random() < .5 ? 0 : 1;
+      cells.forEach(c => { c.innerHTML = ''; c.classList.remove('win'); });
+      boardEl.querySelector('.win-line')?.remove();
+      boardEl.classList.add('playing');
+      btnNext.classList.add('hidden');
+      renderStatus();
+      showToast(`Empieza ${players[turn].name}`);
+    }
+
+    function play(i) {
+      if (over || board[i]) return;
+      const mark = players[turn].mark;
+      board[i] = mark;
+      cells[i].innerHTML = markSvg(mark, false);
+
+      const line = LINES.find(l => l.every(j => board[j] === mark));
+      if (line) {
+        over = true;
+        score[turn]++;
+        line.forEach(j => cells[j].classList.add('win'));
+        drawWinLine(line);
+        endRound(`<span class="who-${mark}">${escHtml(players[turn].name)}</span> gana la partida 🎉`);
+      } else if (board.every(Boolean)) {
+        over = true;
+        draws++;
+        endRound('Empate. Nadie se rinde.');
+      } else {
+        turn = 1 - turn;
+        renderStatus();
+      }
+    }
+
+    function endRound(html) {
+      boardEl.classList.remove('playing');
+      statusEl.innerHTML = html;
+      renderScore();
+      btnNext.classList.remove('hidden');
+    }
+
+    function drawWinLine(line) {
+      // Centros de las casillas en un viewBox 0-3
+      const c = j => [(j % 3) + .5, Math.floor(j / 3) + .5];
+      const [a, b] = [c(line[0]), c(line[2])];
+      const ext = .35; // alarga la línea más allá del centro de las fichas
+      const dx = Math.sign(b[0] - a[0]) * ext, dy = Math.sign(b[1] - a[1]) * ext;
+      const svg = `<svg class="win-line" viewBox="0 0 3 3"><line x1="${a[0]-dx}" y1="${a[1]-dy}" x2="${b[0]+dx}" y2="${b[1]+dy}" pathLength="100"/></svg>`;
+      boardEl.insertAdjacentHTML('beforeend', svg);
+    }
+
+    function renderStatus() {
+      const p = players[turn];
+      statusEl.innerHTML = `Turno de <span class="who-${p.mark}">${escHtml(p.name)}</span>`;
+      [0, 1].forEach(i => document.getElementById('score' + i).classList.toggle('turn', !over && i === turn));
+    }
+
+    function renderScore() {
+      [0, 1].forEach(i => {
+        const el = document.getElementById('score' + i);
+        el.dataset.mark = players[i].mark;
+        el.classList.toggle('turn', !over && i === turn);
+        el.querySelector('.score-name').innerHTML = markSvg(players[i].mark, true) + `<span>${escHtml(players[i].name)}</span>`;
+        el.querySelector('.score-num').textContent = score[i];
+      });
+      document.getElementById('draws').textContent = draws;
+    }
+
+    boardEl.addEventListener('click', e => {
+      const c = e.target.closest('.cell');
+      if (c) play(+c.dataset.i);
+    });
+    document.getElementById('btnStart').addEventListener('click', startMatch);
+    ['name0', 'name1'].forEach(id => document.getElementById(id).addEventListener('keydown', e => { if (e.key === 'Enter') startMatch(); }));
+    btnNext.addEventListener('click', newRound);
+    document.getElementById('btnRestart').addEventListener('click', newRound);
+    document.getElementById('btnPlayers').addEventListener('click', backToSetup);
+
+    loadPlayers();
+
+    document.body.style.opacity='0'; document.body.style.transition='opacity .4s ease';
+    window.addEventListener('load', () => { document.body.style.opacity='1'; });
+  </script>
+</body>
+</html>
