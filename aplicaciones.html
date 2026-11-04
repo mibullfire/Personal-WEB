@@ -6,16 +6,90 @@
   <title>Aplicaciones — Miguel Toro</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,700;0,900;1,700;1,900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <link rel="icon" type="image/png" href="img/web-icon.png" />
   <link rel="stylesheet" href="styles.css" />
   <style>
+    /* Tema Xbox Flow: solo afecta a esta página */
+    :root {
+      --black: #03080f;
+      --dark: #0a1526;
+      --dark2: #101f36;
+      --white: #f2f7fc;
+      --white2: #d3e1f0;
+      --gray: #a2b6cf;
+      --gray2: #3a5070;
+      --accent: #40c4ff;
+      --accent2: #9fe3ff;
+      --xb-blue: #0a5cc4;
+      --xb-blue-mid: #2f9bf0;
+      --radius-lg: 14px;
+      --xb-font: 'Segoe UI', 'Inter', sans-serif;
+    }
+
+    body {
+      font-family: var(--xb-font);
+      background: var(--black);
+    }
+
+    /* Fondo: resplandor azul con cintas de luz en movimiento */
+    .xb-flow {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      overflow: hidden;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse 90% 70% at 50% 42%, rgba(47,155,240,0.34) 0%, rgba(10,92,196,0.2) 38%, transparent 72%),
+        linear-gradient(180deg, #060f1e 0%, #03080f 60%, #020509 100%);
+    }
+
+    .xb-flow svg {
+      position: absolute;
+      top: -10%; left: -15%;
+      width: 130%; height: 120%;
+      mix-blend-mode: screen;
+      will-change: transform;
+    }
+
+    .xb-soft { filter: blur(14px); }
+
+    .xb-flow-a { animation: xbDrift 26s ease-in-out infinite alternate; }
+    .xb-flow-b { animation: xbDrift 34s ease-in-out infinite alternate-reverse; }
+
+    @keyframes xbDrift {
+      from { transform: translate3d(-6%, 2%, 0) scaleY(0.94); }
+      to   { transform: translate3d(6%, -3%, 0) scaleY(1.08); }
+    }
+
     a.proy-card { display: flex; flex-direction: column; }
 
-    .nav-link--active {
-      background: rgba(255,77,171,0.12) !important;
-      color: var(--accent) !important;
+    /* Cursor */
+    .cursor-follower { border-color: rgba(64,196,255,0.45); }
+
+    body:has(a:not(.footer-secret):hover) .cursor-follower,
+    body:has(button:hover) .cursor-follower { border-color: rgba(64,196,255,0.85); }
+
+    /* Navbar */
+    .navbar.scrolled {
+      background: rgba(6,15,30,0.8);
+      border-bottom-color: rgba(64,196,255,0.14);
     }
+
+    .nav-links {
+      background: linear-gradient(180deg, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.04) 50%, rgba(10,92,196,0.14) 100%);
+      border-color: rgba(64,196,255,0.2);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.18);
+    }
+
+    .nav-link--active {
+      background: linear-gradient(180deg, #a5e6ff 0%, #2fa8f0 100%) !important;
+      color: var(--black) !important;
+      font-weight: 600;
+      box-shadow: 0 0 16px rgba(64,196,255,0.45);
+    }
+
+    .social-pill { border-color: rgba(64,196,255,0.28); }
 
     /* Page hero */
     .page-hero {
@@ -29,28 +103,31 @@
       overflow: hidden;
     }
 
-    .page-hero-inner { max-width: 700px; margin: 0 auto; }
+    .page-hero-inner { max-width: 700px; margin: 0 auto; position: relative; z-index: 1; }
+
+    .page-hero .section-label { color: var(--accent); }
 
     .page-hero-title {
       font-size: clamp(2.8rem, 7vw, 5.5rem);
-      font-weight: 900;
-      letter-spacing: -0.04em;
+      font-weight: 300;
+      letter-spacing: -0.03em;
       line-height: 1.05;
       margin-bottom: 1.5rem;
+      text-shadow: 0 0 34px rgba(64,196,255,0.45);
       opacity: 0;
       transform: translateY(30px);
       animation: fadeUp 0.8s 0.3s forwards;
     }
 
     .page-hero-title em {
-      font-family: 'Playfair Display', serif;
-      font-style: italic;
+      font-style: normal;
+      font-weight: 600;
       color: var(--accent);
     }
 
     .page-hero-sub {
       font-size: 1.1rem;
-      color: var(--gray);
+      color: var(--white2);
       line-height: 1.7;
       opacity: 0;
       transform: translateY(20px);
@@ -60,12 +137,10 @@
     .page-hero-deco {
       position: absolute;
       bottom: 0; left: 0; right: 0;
-      font-family: 'Playfair Display', serif;
       font-size: clamp(5rem, 12vw, 13rem);
-      font-style: italic;
-      font-weight: 900;
+      font-weight: 700;
       color: transparent;
-      -webkit-text-stroke: 1px rgba(255,255,255,0.05);
+      -webkit-text-stroke: 1px rgba(64,196,255,0.1);
       white-space: nowrap;
       letter-spacing: -0.02em;
       text-align: center;
@@ -77,7 +152,7 @@
     /* Apps section */
     .apps-section {
       padding: 4rem 2.5rem 8rem;
-      border-top: 1px solid rgba(255,255,255,0.06);
+      border-top: 1px solid rgba(64,196,255,0.14);
     }
 
     .apps-inner { max-width: 1100px; margin: 0 auto; }
@@ -88,10 +163,42 @@
       gap: 1.8rem;
     }
 
+    /* Panel de cada aplicación */
+    .proy-card {
+      background: linear-gradient(180deg, rgba(28,48,84,0.82) 0%, rgba(10,19,36,0.9) 100%);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(64,196,255,0.2);
+      box-shadow: 0 14px 34px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.14);
+    }
+
+    .proy-card:hover,
+    .proy-card:focus-visible {
+      transform: translateY(-6px) scale(1.015);
+      border-color: var(--accent);
+      box-shadow:
+        0 0 0 2px rgba(64,196,255,0.55),
+        0 0 38px rgba(64,196,255,0.38),
+        0 20px 50px rgba(0,0,0,0.5);
+      outline: none;
+    }
+
+    .proy-tag {
+      background: rgba(64,196,255,0.12);
+      border-color: rgba(64,196,255,0.3);
+    }
+
+    .proy-link--primary {
+      background: linear-gradient(180deg, #9fe3ff 0%, #5cc8fb 48%, #2fa8f0 52%, #1c8fe0 100%);
+      border-color: #8fdcff;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), 0 2px 10px rgba(47,155,240,0.45);
+    }
+
     /* App card icon area */
     .app-icon-wrap {
       height: 200px;
-      background: var(--dark);
+      background:
+        radial-gradient(ellipse 80% 90% at 50% 100%, rgba(64,196,255,0.6) 0%, transparent 70%),
+        linear-gradient(180deg, var(--xb-blue-mid) 0%, var(--xb-blue) 55%, #063f94 100%);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -99,11 +206,14 @@
       overflow: hidden;
     }
 
+    /* Brillo satinado superior */
     .app-icon-wrap::before {
       content: '';
       position: absolute;
-      inset: 0;
-      background: radial-gradient(ellipse at center, rgba(255,77,171,0.07) 0%, transparent 65%);
+      top: -55%; left: -15%; right: -15%;
+      height: 100%;
+      border-radius: 50%;
+      background: linear-gradient(180deg, rgba(255,255,255,0.34) 0%, rgba(255,255,255,0.05) 100%);
       pointer-events: none;
     }
 
@@ -111,10 +221,11 @@
       font-family: 'JetBrains Mono', 'Courier New', monospace;
       font-size: 3.5rem;
       font-weight: 700;
-      color: var(--accent);
-      opacity: 0.75;
+      color: var(--white);
+      opacity: 0.92;
       z-index: 1;
       letter-spacing: -0.05em;
+      text-shadow: 0 2px 14px rgba(0,0,0,0.4);
       transition: opacity 0.4s, transform 0.4s;
     }
 
@@ -124,9 +235,20 @@
       letter-spacing: 0;
     }
 
-    .proy-card:hover .app-icon {
+    .proy-card:hover .app-icon,
+    .proy-card:focus-visible .app-icon {
       opacity: 1;
       transform: scale(1.06);
+    }
+
+    /* Footer */
+    .footer { border-top-color: rgba(64,196,255,0.14); }
+
+    .footer-deco {
+      font-family: var(--xb-font);
+      font-style: normal;
+      font-weight: 700;
+      -webkit-text-stroke: 1px rgba(64,196,255,0.1);
     }
 
     /* Responsive */
@@ -140,9 +262,35 @@
       .apps-grid { grid-template-columns: 1fr; }
       .page-hero-deco { display: none; }
     }
+
+    @media (prefers-reduced-motion: reduce) {
+      .xb-flow svg { animation: none; }
+    }
   </style>
 </head>
 <body>
+
+  <!-- Fondo Xbox Flow -->
+  <div class="xb-flow" aria-hidden="true">
+    <svg class="xb-flow-a" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" fill="none">
+      <defs>
+        <linearGradient id="xbRibbon" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#40c4ff" stop-opacity="0" />
+          <stop offset="0.5" stop-color="#40c4ff" stop-opacity="0.75" />
+          <stop offset="1" stop-color="#2f9bf0" stop-opacity="0" />
+        </linearGradient>
+      </defs>
+      <path class="xb-soft" d="M-100 520 C 300 300, 620 760, 960 520 S 1450 300, 1700 470" stroke="url(#xbRibbon)" stroke-width="120" opacity="0.14" />
+      <path class="xb-soft" d="M-100 560 C 320 360, 620 800, 980 560 S 1450 360, 1700 520" stroke="url(#xbRibbon)" stroke-width="44" opacity="0.26" />
+      <path d="M-100 540 C 310 330, 620 780, 970 540 S 1450 330, 1700 495" stroke="url(#xbRibbon)" stroke-width="2.5" />
+    </svg>
+    <svg class="xb-flow-b" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" fill="none">
+      <path class="xb-soft" d="M-100 300 C 260 520, 640 120, 1000 340 S 1480 560, 1700 280" stroke="url(#xbRibbon)" stroke-width="90" opacity="0.12" />
+      <path d="M-100 330 C 260 540, 640 160, 1000 370 S 1480 580, 1700 310" stroke="url(#xbRibbon)" stroke-width="2" opacity="0.8" />
+      <path class="xb-soft" d="M-100 680 C 340 860, 700 480, 1080 700 S 1500 820, 1700 620" stroke="url(#xbRibbon)" stroke-width="30" opacity="0.2" />
+      <path d="M-100 700 C 340 880, 700 500, 1080 720 S 1500 840, 1700 640" stroke="url(#xbRibbon)" stroke-width="1.5" opacity="0.7" />
+    </svg>
+  </div>
 
   <div class="cursor" id="cursor"></div>
   <div class="cursor-follower" id="cursorFollower"></div>
