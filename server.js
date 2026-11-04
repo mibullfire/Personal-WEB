@@ -141,6 +141,12 @@ const server = http.createServer(async (req, res) => {
     return serveFile(req, res, 'admin.html', { 'X-Robots-Tag': 'noindex, nofollow' });
   }
 
+  // Escritorio privado: vive en la web principal.
+  if (pathname === '/escritorio' || pathname === '/escritorio/' || pathname === '/escritorio.html') {
+    if (blog) return redirect(res, `https://${MAIN_HOST}/escritorio`);
+    return serveFile(req, res, 'escritorio.html', { 'X-Robots-Tag': 'noindex, nofollow' });
+  }
+
   if (blog) {
     // En el blog, /blog.html es la home: se canonicaliza a "/".
     if (pathname === '/blog.html') return redirect(res, '/' + url.search);

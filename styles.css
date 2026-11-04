@@ -62,10 +62,10 @@ button { cursor: none; font-family: inherit; }
   transition: transform 0.15s ease, width 0.3s, height 0.3s, border-color 0.3s;
 }
 
-body:has(a:hover) .cursor,
+body:has(a:not(.footer-secret):hover) .cursor,
 body:has(button:hover) .cursor { width: 16px; height: 16px; }
 
-body:has(a:hover) .cursor-follower,
+body:has(a:not(.footer-secret):hover) .cursor-follower,
 body:has(button:hover) .cursor-follower {
   width: 56px; height: 56px;
   border-color: rgba(255,77,171,0.8);
@@ -763,6 +763,9 @@ body:has(button:hover) .cursor-follower {
   font-size: 0.9rem;
   font-weight: 700;
 }
+
+/* Entrada discreta al escritorio: no debe parecer un enlace */
+.footer-secret { cursor: none; }
 
 .footer-copy {
   font-size: 0.8rem;

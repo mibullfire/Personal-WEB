@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>escritorio</title>
+  <link rel="icon" type="image/png" href="/img/web-icon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/escritorio.css" />
+</head>
+<body>
+
+  <!-- Fondo de pantalla -->
+  <div class="wallpaper" aria-hidden="true">
+    <div class="sun"></div>
+    <svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice">
+      <defs>
+        <linearGradient id="hill-back" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#b6ec6a" />
+          <stop offset="1" stop-color="#4fb84a" />
+        </linearGradient>
+        <linearGradient id="hill-front" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#8fdc4e" />
+          <stop offset="1" stop-color="#1f9440" />
+        </linearGradient>
+        <linearGradient id="ribbon" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#fff" stop-opacity="0" />
+          <stop offset="0.5" stop-color="#fff" stop-opacity="0.55" />
+          <stop offset="1" stop-color="#fff" stop-opacity="0" />
+        </linearGradient>
+        <filter id="soft" x="-20%" y="-50%" width="140%" height="200%">
+          <feGaussianBlur stdDeviation="26" />
+        </filter>
+      </defs>
+
+      <g fill="#fff" opacity="0.8" filter="url(#soft)">
+        <ellipse cx="280" cy="190" rx="210" ry="46" />
+        <ellipse cx="400" cy="160" rx="130" ry="42" />
+        <ellipse cx="1180" cy="290" rx="240" ry="44" />
+        <ellipse cx="760" cy="90" rx="150" ry="28" />
+      </g>
+
+      <path fill="none" stroke="url(#ribbon)" stroke-width="3" d="M-40 520 C 360 340, 760 660, 1640 380" />
+      <path fill="none" stroke="url(#ribbon)" stroke-width="10" opacity="0.5" d="M-40 560 C 400 390, 800 690, 1640 420" />
+
+      <path fill="url(#hill-back)" d="M0 660 C 260 560, 520 590, 800 670 S 1340 720, 1600 590 V900 H0 Z" />
+      <path fill="url(#hill-front)" d="M0 790 C 300 660, 660 690, 960 770 S 1420 830, 1600 730 V900 H0 Z" />
+    </svg>
+    <span class="bubble b1"></span>
+    <span class="bubble b2"></span>
+    <span class="bubble b3"></span>
+    <span class="bubble b4"></span>
+    <span class="bubble b5"></span>
+  </div>
+
+  <!-- Contraseña -->
+  <form class="glass login" id="login" hidden>
+    <h1>Hola de nuevo</h1>
+    <label class="lbl" for="password">contraseña</label>
+    <input class="field" type="password" id="password" autocomplete="current-password" required />
+    <label class="check"><input type="checkbox" id="remember" /> recordar en este dispositivo</label>
+    <button class="primary" type="submit">entrar</button>
+    <p class="msg" id="login-msg" role="alert"></p>
+  </form>
+
+  <!-- Escritorio -->
+  <div class="desktop" id="app" hidden>
+    <nav class="top">
+      <a class="pill" href="/">web</a>
+      <button class="pill" type="button" id="logout">salir</button>
+    </nav>
+
+    <h1 class="greeting" id="greeting"></h1>
+
+    <main class="widgets">
+      <section class="glass weather" aria-label="El tiempo">
+        <button class="place" type="button" id="place" title="Cambiar de zona"></button>
+        <form class="place-form" id="place-form" hidden>
+          <input class="field" id="place-input" placeholder="busca una ciudad" aria-label="Buscar ciudad" autocomplete="off" />
+          <div class="place-results" id="place-results"></div>
+        </form>
+
+        <div class="weather-now">
+          <span class="weather-icon" id="w-icon"></span>
+          <span class="weather-temp" id="w-temp">--°</span>
+        </div>
+        <p class="weather-desc" id="w-desc"></p>
+
+        <dl class="weather-facts">
+          <div><dt>sensación</dt><dd id="w-feels">--</dd></div>
+          <div><dt>humedad</dt><dd id="w-humidity">--</dd></div>
+          <div><dt>viento</dt><dd id="w-wind">--</dd></div>
+        </dl>
+
+        <div class="weather-days" id="w-days"></div>
+      </section>
+
+      <section class="glass clock" aria-label="Reloj">
+        <svg class="dial" viewBox="0 0 200 200" aria-hidden="true">
+          <defs>
+            <radialGradient id="dial-face" cx="50%" cy="30%" r="75%">
+              <stop offset="0" stop-color="#ffffff" />
+              <stop offset="1" stop-color="#d3effb" />
+            </radialGradient>
+          </defs>
+          <circle cx="100" cy="100" r="94" fill="url(#dial-face)" stroke="#fff" stroke-width="6" />
+          <g id="ticks"></g>
+          <line class="hand hand-hour" id="hand-hour" x1="100" y1="100" x2="100" y2="56" />
+          <line class="hand hand-minute" id="hand-minute" x1="100" y1="100" x2="100" y2="34" />
+          <line class="hand hand-second" id="hand-second" x1="100" y1="112" x2="100" y2="26" />
+          <circle cx="100" cy="100" r="6" fill="#0d7fc4" />
+        </svg>
+        <p class="clock-time" id="clock-time"></p>
+        <p class="clock-date" id="clock-date"></p>
+      </section>
+
+      <section class="glass notes" aria-label="Notas">
+        <h2>Notas</h2>
+        <form class="note-form" id="note-form">
+          <input class="field" id="note-input" maxlength="500" placeholder="escribe una nota" aria-label="Nueva nota" autocomplete="off" />
+          <button class="primary round" type="submit" aria-label="Añadir nota">+</button>
+        </form>
+        <ul class="note-list" id="notes"></ul>
+        <p class="msg" id="notes-msg" role="alert"></p>
+      </section>
+    </main>
+  </div>
+
+  <script src="/js/escritorio.js"></script>
+</body>
+</html>

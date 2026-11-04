@@ -85,6 +85,10 @@ El servidor detecta el volumen solo (Railway define `RAILWAY_VOLUME_MOUNT_PATH`)
 - **"Recordar en este dispositivo":** guarda la contraseña en ese navegador. Usa **salir** para olvidarla.
 - **Bloqueo:** después de 5 contraseñas incorrectas, esa IP queda bloqueada 15 minutos.
 
+## Escritorio privado
+
+El ✦ del pie de la web principal lleva a `/escritorio`, que se abre con la misma `ADMIN_PASSWORD`. Tiene saludo, reloj, el tiempo de la zona elegida (Open-Meteo, sin clave) y notas, guardadas en la tabla `notes` de Postgres. La tabla se crea sola al arrancar. La zona elegida se guarda en cada navegador.
+
 ## Cambiar la contraseña
 
 Cambia `ADMIN_PASSWORD` en **Variables** del servicio web. Railway redespliega solo. Los dispositivos donde tenías la sesión recordada te volverán a pedir la contraseña.
