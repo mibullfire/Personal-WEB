@@ -36,24 +36,23 @@
         </filter>
       </defs>
 
-      <g fill="#fff" opacity="0.8" filter="url(#soft)">
+      <g class="layer-clouds" fill="#fff" opacity="0.8" filter="url(#soft)">
         <ellipse cx="280" cy="190" rx="210" ry="46" />
         <ellipse cx="400" cy="160" rx="130" ry="42" />
         <ellipse cx="1180" cy="290" rx="240" ry="44" />
         <ellipse cx="760" cy="90" rx="150" ry="28" />
       </g>
 
-      <path fill="none" stroke="url(#ribbon)" stroke-width="3" d="M-40 520 C 360 340, 760 660, 1640 380" />
-      <path fill="none" stroke="url(#ribbon)" stroke-width="10" opacity="0.5" d="M-40 560 C 400 390, 800 690, 1640 420" />
+      <g class="layer-ribbons">
+        <path fill="none" stroke="url(#ribbon)" stroke-width="3" d="M-120 520 C 360 340, 760 660, 1720 380" />
+        <path fill="none" stroke="url(#ribbon)" stroke-width="10" opacity="0.5" d="M-120 560 C 400 390, 800 690, 1720 420" />
+      </g>
 
-      <path fill="url(#hill-back)" d="M0 660 C 260 560, 520 590, 800 670 S 1340 720, 1600 590 V900 H0 Z" />
-      <path fill="url(#hill-front)" d="M0 790 C 300 660, 660 690, 960 770 S 1420 830, 1600 730 V900 H0 Z" />
+      <path class="layer-hill-back" fill="url(#hill-back)" d="M-120 690 C 260 560, 520 590, 800 670 S 1340 720, 1720 560 V1000 H-120 Z" />
+      <path class="layer-hill-front" fill="url(#hill-front)" d="M-120 830 C 300 660, 660 690, 960 770 S 1420 830, 1720 700 V1000 H-120 Z" />
     </svg>
-    <span class="bubble b1"></span>
-    <span class="bubble b2"></span>
-    <span class="bubble b3"></span>
-    <span class="bubble b4"></span>
-    <span class="bubble b5"></span>
+    <div class="light" id="light"></div>
+    <div class="bubbles" id="bubbles"></div>
   </div>
 
   <!-- Contraseña -->
@@ -129,6 +128,7 @@
     </main>
   </div>
 
+  <script src="/js/escritorio-fondo.js"></script>
   <script src="/js/escritorio.js"></script>
 </body>
 </html>

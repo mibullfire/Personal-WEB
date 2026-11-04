@@ -137,16 +137,21 @@
     $(id).setAttribute('transform', `rotate(${degrees} 100 100)`);
   }
 
-  function tick() {
+  // Las agujas avanzan de forma continua, sin saltos de segundo en segundo.
+  function moveHands() {
     const now = new Date();
-    const seconds = now.getSeconds();
+    const seconds = now.getSeconds() + now.getMilliseconds() / 1000;
     const minutes = now.getMinutes() + seconds / 60;
     const hours = (now.getHours() % 12) + minutes / 60;
 
     setHand('hand-second', seconds * 6);
     setHand('hand-minute', minutes * 6);
     setHand('hand-hour', hours * 30);
+    requestAnimationFrame(moveHands);
+  }
 
+  function tick() {
+    const now = new Date();
     $('clock-time').textContent = now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
     $('clock-date').textContent = now.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
     $('greeting').textContent = `${greetingFor(now.getHours())}, Miguel`;
@@ -154,6 +159,7 @@
 
   function startClock() {
     drawTicks();
+    moveHands();
     tick();
     setInterval(tick, 1000);
   }
