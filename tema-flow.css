@@ -1,0 +1,125 @@
+/* Tema Xbox Flow para las páginas internas de apps/ y juegos/.
+   Mismo diseño que aplicaciones.html (azul) y juegos.html (verde).
+   Cada página elige paleta con <html data-tema="apps|juegos"> y carga este
+   fichero después de su <style>, para que estas reglas tengan prioridad. */
+
+html[data-tema="apps"] {
+  --black: #03080f; --dark: #0a1526; --dark2: #101f36; --dark3: #182b47;
+  --white: #f2f7fc; --white2: #d3e1f0; --gray: #a2b6cf; --gray2: #3a5070;
+  --accent: #40c4ff; --accent2: #9fe3ff;
+  --accent-rgb: 64,196,255; --black-rgb: 3,8,15; --nav-rgb: 6,15,30;
+  --xb-mid: #2f9bf0; --xb-mid-rgb: 47,155,240;
+  --xb-base: #0a5cc4; --xb-base-rgb: 10,92,196; --xb-deep: #063f94;
+  --xb-sky: #060f1e; --xb-floor: #020509;
+  --xb-panel: linear-gradient(180deg, rgba(28,48,84,0.82) 0%, rgba(10,19,36,0.9) 100%);
+  --xb-btn: linear-gradient(180deg, #9fe3ff 0%, #5cc8fb 48%, #2fa8f0 52%, #1c8fe0 100%);
+  --xb-active: linear-gradient(180deg, #a5e6ff 0%, #2fa8f0 100%);
+}
+
+html[data-tema="juegos"] {
+  --black: #040b05; --dark: #0a1a0c; --dark2: #102413; --dark3: #1a331e;
+  --white: #f4f9f2; --white2: #d7e6d3; --gray: #a4bda2; --gray2: #3a553c;
+  --accent: #9bf00b; --accent2: #c4f85f;
+  --accent-rgb: 155,240,11; --black-rgb: 4,11,5; --nav-rgb: 6,19,10;
+  --xb-mid: #52b043; --xb-mid-rgb: 82,176,67;
+  --xb-base: #107c10; --xb-base-rgb: 16,124,16; --xb-deep: #0a5a0c;
+  --xb-sky: #06130a; --xb-floor: #020603;
+  --xb-panel: linear-gradient(180deg, rgba(30,58,34,0.82) 0%, rgba(10,24,13,0.9) 100%);
+  --xb-btn: linear-gradient(180deg, #c4f85f 0%, #8fdc1c 48%, #6fc41a 52%, #5aae12 100%);
+  --xb-active: linear-gradient(180deg, #b9f44a 0%, #6fc41a 100%);
+}
+
+html[data-tema] {
+  --radius-lg: 14px;
+  --xb-font: 'Segoe UI', 'Inter', sans-serif;
+  --xb-tile:
+    radial-gradient(ellipse 80% 90% at 50% 100%, rgba(var(--accent-rgb),0.6) 0%, transparent 70%),
+    linear-gradient(180deg, var(--xb-mid) 0%, var(--xb-base) 55%, var(--xb-deep) 100%);
+}
+
+body { background: var(--black); }
+
+/* Fondo: resplandor con cintas de luz en movimiento (lo crea js/tema-flow.js) */
+.xb-flow {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 90% 70% at 50% 42%, rgba(var(--xb-mid-rgb),0.34) 0%, rgba(var(--xb-base-rgb),0.2) 38%, transparent 72%),
+    linear-gradient(180deg, var(--xb-sky) 0%, var(--black) 60%, var(--xb-floor) 100%);
+}
+
+.xb-flow svg {
+  position: absolute;
+  top: -10%; left: -15%;
+  width: 130%; height: 120%;
+  mix-blend-mode: screen;
+  will-change: transform;
+}
+
+.xb-soft { filter: blur(14px); }
+
+.xb-flow-a { animation: xbDrift 26s ease-in-out infinite alternate; }
+.xb-flow-b { animation: xbDrift 34s ease-in-out infinite alternate-reverse; }
+
+@keyframes xbDrift {
+  from { transform: translate3d(-6%, 2%, 0) scaleY(0.94); }
+  to   { transform: translate3d(6%, -3%, 0) scaleY(1.08); }
+}
+
+/* Navegación */
+.app-nav { background: rgba(var(--nav-rgb),0.8); }
+
+/* Cabecera de la herramienta */
+.tool-title, .paste-title {
+  font-weight: 300;
+  letter-spacing: -0.03em;
+  text-shadow: 0 0 26px rgba(var(--accent-rgb),0.45);
+}
+
+.tool-icon, .paste-title-icon {
+  color: var(--white);
+  background: var(--xb-tile);
+  border-color: rgba(var(--accent-rgb),0.35);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.35), 0 4px 14px rgba(0,0,0,0.4);
+}
+
+/* Paneles */
+:is(.dice-area, .excuse-card, .result-wrap, .sw-display-wrap, .cd-display-wrap,
+    .winner-wrap, .ball-display, .phrase-card, .age-box, .player-card,
+    .score-player, .score-draws) {
+  background: var(--xb-panel);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 14px 34px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.14);
+}
+
+/* Botón principal satinado */
+:is(.btn-roll, .btn-primary, .btn-consult, .btn-generate, .btn-spin, .btn-start,
+    .btn-set, .btn-next, .btn-bingo-reset, .age-btn:not(.age-btn--no)),
+:is(.btn-roll, .btn-primary, .btn-consult, .btn-generate, .btn-spin, .btn-start,
+    .btn-set, .btn-next, .btn-bingo-reset, .age-btn:not(.age-btn--no)):hover {
+  background: var(--xb-btn);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), 0 2px 10px rgba(var(--xb-mid-rgb),0.45);
+}
+
+:is(.btn-roll, .btn-primary, .btn-consult, .btn-generate, .btn-spin, .btn-start,
+    .btn-set, .btn-next, .btn-bingo-reset, .age-btn:not(.age-btn--no)):hover {
+  filter: brightness(1.08);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), 0 0 22px rgba(var(--accent-rgb),0.5);
+}
+
+/* Pestañas y selectores activos */
+.tab-btn.active, .mode-btn.active, .cat-btn.active {
+  background: var(--xb-active);
+  color: var(--black);
+  box-shadow: 0 0 14px rgba(var(--accent-rgb),0.4);
+}
+
+/* Buscaminas: la ventana retro se conserva, cambia el escritorio */
+.desktop { background: var(--xb-tile); }
+
+@media (prefers-reduced-motion: reduce) {
+  .xb-flow svg { animation: none; }
+}
