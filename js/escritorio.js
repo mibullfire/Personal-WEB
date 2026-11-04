@@ -6,6 +6,9 @@
   const DEFAULT_PLACE = { name: 'Madrid', latitude: 40.4165, longitude: -3.7026 };
   const WEATHER_EVERY_MS = 15 * 60 * 1000;
   const SEARCH_DELAY_MS = 300;
+  const COMBO_POPS = 3; // burbujas seguidas para que empiece el marcador...
+  const COMBO_WINDOW_MS = 3000; // ...en este tiempo
+  const SCORE_TIMEOUT_MS = 10000;
 
   const $ = (id) => document.getElementById(id);
   const $login = $('login');
@@ -92,6 +95,7 @@
     password = '';
     forgetPassword();
     $app.hidden = true;
+    resetScore();
     $notes.replaceChildren();
     $login.hidden = false;
     $('password').value = '';
@@ -111,6 +115,41 @@
   $('logout').addEventListener('click', () => logout());
 
   // ── Saludo y reloj ──
+
+  let score = null; // null: se ve el saludo
+  let scoreTimer = null;
+  let recentPops = [];
+
+  function renderGreeting() {
+    $('greeting').textContent = score === null
+      ? `${greetingFor(new Date().getHours())}, Miguel`
+      : `Score: ${score}`;
+  }
+
+  function resetScore() {
+    score = null;
+    recentPops = [];
+    clearTimeout(scoreTimer);
+    renderGreeting();
+  }
+
+  window.addEventListener('bubble-pop', () => {
+    if ($app.hidden) return;
+
+    if (score !== null) {
+      score++;
+    } else {
+      const now = performance.now();
+      recentPops = recentPops.filter((time) => now - time < COMBO_WINDOW_MS);
+      recentPops.push(now);
+      if (recentPops.length < COMBO_POPS) return;
+      score = recentPops.length;
+    }
+
+    renderGreeting();
+    clearTimeout(scoreTimer);
+    scoreTimer = setTimeout(resetScore, SCORE_TIMEOUT_MS);
+  });
 
   function greetingFor(hour) {
     if (hour >= 6 && hour < 14) return 'Buenos días';
@@ -154,7 +193,7 @@
     const now = new Date();
     $('clock-time').textContent = now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
     $('clock-date').textContent = now.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
-    $('greeting').textContent = `${greetingFor(now.getHours())}, Miguel`;
+    renderGreeting();
   }
 
   function startClock() {

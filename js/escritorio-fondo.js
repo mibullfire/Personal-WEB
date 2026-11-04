@@ -66,6 +66,7 @@
     bubble.alive = false;
     bubble.respawnAt = performance.now() + random(1500, 5000);
     bubble.el.classList.add('popping');
+    window.dispatchEvent(new Event('bubble-pop'));
 
     addEffect('pop-ring', bubble.x, bubble.y, { '--size': `${bubble.size}px` });
     const drops = Math.round(6 + bubble.size / 10);
