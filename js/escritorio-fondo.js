@@ -10,7 +10,6 @@
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const root = document.documentElement;
   const $bubbles = document.getElementById('bubbles');
-  const $light = document.getElementById('light');
 
   const random = (min, max) => min + Math.random() * (max - min);
 
@@ -111,7 +110,6 @@
     if (!overGlass(e)) popAlong(pointer.x, pointer.y, e.clientX, e.clientY);
     pointer.x = e.clientX;
     pointer.y = e.clientY;
-    if (e.pointerType === 'mouse') $light.classList.add('on');
   });
 
   window.addEventListener('pointerdown', (e) => {
@@ -119,8 +117,6 @@
     pointer.y = e.clientY;
     if (!overGlass(e)) popAlong(e.clientX, e.clientY, e.clientX, e.clientY);
   });
-
-  root.addEventListener('pointerleave', () => $light.classList.remove('on'));
 
   for (const card of document.querySelectorAll('.glass')) {
     card.addEventListener('pointermove', (e) => {
@@ -155,7 +151,6 @@
       root.style.setProperty('--mx', ((eased.x / innerWidth) * 2 - 1).toFixed(4));
       root.style.setProperty('--my', ((eased.y / innerHeight) * 2 - 1).toFixed(4));
     }
-    $light.style.transform = `translate3d(${pointer.x}px, ${pointer.y}px, 0)`;
 
     for (const bubble of bubbles) moveBubble(bubble, dt, now);
     requestAnimationFrame(frame);

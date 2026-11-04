@@ -95,7 +95,8 @@ function serveFile(req, res, relPath, extraHeaders = {}) {
     const headers = {
       'Content-Type': MIME[ext] || 'application/octet-stream',
       'Content-Length': stats.size,
-      'Cache-Control': ext === '.html' ? 'no-cache' : 'public, max-age=3600',
+      // CSS y JS cambian con cada despliegue: un .css viejo con un .html nuevo rompe la pagina.
+      'Cache-Control': ['.html', '.css', '.js'].includes(ext) ? 'no-cache' : 'public, max-age=3600',
       ...extraHeaders,
     };
 
