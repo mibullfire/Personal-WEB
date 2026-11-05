@@ -30,6 +30,8 @@ html[data-tema="juegos"] {
 }
 
 html[data-tema] {
+  --ink-rgb: 255,255,255;
+  --xb-sombra: 0 14px 34px rgba(0,0,0,0.45);
   --radius-lg: 14px;
   --xb-font: 'Segoe UI', 'Inter', sans-serif;
   --xb-tile:
@@ -92,7 +94,7 @@ body { background: var(--black); }
     .score-player, .score-draws) {
   background: var(--xb-panel);
   backdrop-filter: blur(12px);
-  box-shadow: 0 14px 34px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.14);
+  box-shadow: var(--xb-sombra), inset 0 1px 0 rgba(255,255,255,0.14);
 }
 
 /* Botón principal satinado */

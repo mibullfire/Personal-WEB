@@ -1,0 +1,137 @@
+/* Modo claro en tonos crema y botón para cambiar de modo.
+   El oscuro es el modo por defecto: aquí solo está lo que cambia en el claro,
+   que se activa con <html data-modo="claro"> (lo gestiona js/modo.js). */
+
+/* ── Botón ── */
+.modo-toggle {
+  position: fixed;
+  top: 0.8rem; /* centrado en .app-nav */
+  right: 1.2rem;
+  z-index: 300;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0.55rem;
+  display: flex;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.22);
+  background: rgba(20,20,20,0.6);
+  color: #f5f5f5;
+  backdrop-filter: blur(12px);
+  transition: transform 0.2s, background 0.2s;
+}
+
+.modo-toggle:hover { transform: scale(1.08); background: rgba(50,50,50,0.7); }
+.modo-toggle:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+
+.modo-toggle svg {
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+html[data-modo="claro"] .modo-toggle {
+  border-color: rgba(70,50,30,0.25);
+  background: rgba(255,251,242,0.8);
+  color: #3a2a1c;
+}
+
+html[data-modo="claro"] .modo-toggle:hover { background: #fffbf2; }
+
+body:has(.navbar) .modo-toggle { top: 1.5rem; }
+
+@media (max-width: 900px) {
+  body:has(.navbar) .modo-toggle { top: 0.8rem; }
+}
+
+/* Páginas sin cursor propio (blog y panel): cursor normal de botón */
+body:not(:has(.cursor)) .modo-toggle { cursor: pointer; }
+
+/* Hueco en las barras de navegación para que el botón no tape nada */
+html .navbar, html .app-nav { padding-right: 4.6rem; }
+
+/* El panel del blog no tiene barra: sus botones quedarían debajo */
+@media (max-width: 760px) {
+  .admin-wrap { padding-top: 64px; }
+}
+
+/* ── Paleta de la web principal (index) ── */
+html[data-modo="claro"] {
+  color-scheme: light;
+  --black: #f6efe1; --dark: #efe5d3; --dark2: #e6d9c3; --dark3: #dccdb4;
+  --white: #2b2118; --white2: #4f4032; --gray: #6f5f4e; --gray2: #9c8b72;
+  --accent: #c81e78; --accent2: #a3125f;
+  --accent-rgb: 200,30,120; --black-rgb: 246,239,225; --ink-rgb: 70,50,30;
+}
+
+/* Las etiquetas flotan sobre la foto: el velo oscuro no bastaba para leerlas */
+html[data-modo="claro"] .floating-badge { background: rgba(var(--black-rgb),0.85); }
+
+/* ── Xbox Flow: aplicaciones y juegos ── */
+html[data-modo="claro"][data-tema] {
+  --black-rgb: 246,239,225; --nav-rgb: 248,242,230;
+  --xb-sky: #f8f2e6; --xb-floor: #ecdfc9;
+  --xb-sombra: 0 10px 26px rgba(90,65,35,0.16);
+  --xb-panel: linear-gradient(180deg, rgba(255,252,245,0.88) 0%, rgba(245,236,220,0.92) 100%);
+}
+
+html[data-modo="claro"][data-tema="apps"] {
+  --accent: #0a6cb0; --accent2: #07558c; --accent-rgb: 10,108,176;
+  --xb-btn: linear-gradient(180deg, #2a8ad0 0%, #1672bd 48%, #0f62a8 52%, #0b5596 100%);
+  --xb-active: linear-gradient(180deg, #1f7fc6 0%, #0b5596 100%);
+}
+
+html[data-modo="claro"][data-tema="juegos"] {
+  --accent: #2c7a12; --accent2: #22610d; --accent-rgb: 44,122,18;
+  --xb-btn: linear-gradient(180deg, #47992a 0%, #35841e 48%, #2c7518 52%, #256612 100%);
+  --xb-active: linear-gradient(180deg, #3f9025 0%, #256612 100%);
+}
+
+/* Las cintas de luz se aclararían hasta desaparecer sobre el crema */
+html[data-modo="claro"] .xb-flow svg { mix-blend-mode: multiply; opacity: 0.35; }
+
+/* Fondo crema con solo un toque del color de cada sección */
+html[data-modo="claro"] .xb-flow {
+  background:
+    radial-gradient(ellipse 90% 70% at 50% 42%, rgba(var(--xb-mid-rgb),0.1) 0%, transparent 72%),
+    linear-gradient(180deg, var(--xb-sky) 0%, var(--black) 60%, var(--xb-floor) 100%);
+}
+
+/* Lo que va sobre las baldosas de color sigue siendo blanco */
+html[data-modo="claro"] :is(.app-icon, .tool-icon, .paste-title-icon) { color: #fff; }
+
+/* Los resplandores de neón ensucian el texto sobre fondo claro */
+html[data-modo="claro"] :is(.page-hero-title, .tool-title, .paste-title) { text-shadow: none; }
+
+/* Tres en raya: el círculo azul claro no se ve sobre crema */
+html[data-modo="claro"] { --o: #1269a8; }
+
+/* Portapapeles */
+html[data-modo="claro"] .code-input { color: var(--white); }
+html[data-modo="claro"] .code-input::placeholder { color: var(--gray); }
+
+/* ── Blog y panel ── */
+html[data-modo="claro"] body:has(#stars-canvas) {
+  --bg: #f6efe1; --bg2: #efe5d3;
+  --panel: rgba(255,252,245,0.88);
+  --border: #9a78c9; --border2: #b05cc0; --glow: #5f22b0;
+  --cyan: #0a6f69; --lime: #4c7400; --pink: #bd1f78; --yellow: #7d5200;
+  --white: #2b2118; --gray: #6f5f4e;
+  --link: #5f22b0; --link-vis: #a6256f;
+  --texto: #3a2f26; --texto2: #4f4032;
+  --hueco: rgba(255,252,245,0.75);
+}
+
+html[data-modo="claro"] body:has(#stars-canvas) * { text-shadow: none; }
+
+html[data-modo="claro"] :is(.marquee-wrap, .panel-title, .post-header) {
+  background: linear-gradient(90deg, #eadff0, #e0d0ec);
+}
+
+html[data-modo="claro"] .post-meta { background: rgba(70,50,30,0.05); }
+
+/* El contador imita un display: sigue siendo verde sobre negro */
+html[data-modo="claro"] .counter-digit { color: #aaff00; }

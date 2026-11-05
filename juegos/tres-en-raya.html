@@ -84,7 +84,7 @@
     .cell { background: transparent; position: relative; display: flex; align-items: center; justify-content: center; transition: background .25s; }
     .cell:nth-child(-n+6) { border-bottom: 2px solid rgba(var(--accent-rgb),0.29); }
     .cell:not(:nth-child(3n)) { border-right: 2px solid rgba(var(--accent-rgb),0.29); }
-    .board.playing .cell:empty:hover { background: rgba(255,255,255,.03); }
+    .board.playing .cell:empty:hover { background: rgba(var(--ink-rgb),.03); }
     .cell svg { width: 68%; height: 68%; overflow: visible; }
     .cell.win svg { animation: winPulse .9s ease .1s 2; }
     @keyframes winPulse { 50% { transform: scale(1.12); } }
@@ -115,6 +115,8 @@
   </style>
   <link rel="stylesheet" href="../tema-flow.css" />
   <script src="../js/tema-flow.js" defer></script>
+  <link rel="stylesheet" href="../modo.css" />
+  <script src="../js/modo.js"></script>
 </head>
 <body>
   <div class="cursor" id="cursor"></div>

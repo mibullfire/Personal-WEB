@@ -13,6 +13,10 @@
   --gray2: #444;
   --accent: #ff4dab;
   --accent2: #ff1a96;
+  --dark3: #222;
+  --accent-rgb: 255,77,171;
+  --black-rgb: 10,10,10;
+  --ink-rgb: 255,255,255; /* tinta de bordes y velos sutiles */
   --radius: 12px;
   --radius-lg: 20px;
   --transition: 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -52,7 +56,7 @@ button { cursor: none; font-family: inherit; }
 
 .cursor-follower {
   width: 36px; height: 36px;
-  border: 1.5px solid rgba(255,77,171,0.4);
+  border: 1.5px solid rgba(var(--accent-rgb),0.4);
   border-radius: 50%;
   position: fixed;
   top: 0; left: 0;
@@ -68,7 +72,7 @@ body:has(button:hover) .cursor { width: 16px; height: 16px; }
 body:has(a:not(.footer-secret):hover) .cursor-follower,
 body:has(button:hover) .cursor-follower {
   width: 56px; height: 56px;
-  border-color: rgba(255,77,171,0.8);
+  border-color: rgba(var(--accent-rgb),0.8);
 }
 
 @media (pointer: coarse) {
@@ -92,9 +96,9 @@ body:has(button:hover) .cursor-follower {
 }
 
 .navbar.scrolled {
-  background: rgba(10,10,10,0.85);
+  background: rgba(var(--black-rgb),0.85);
   backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  border-bottom: 1px solid rgba(var(--ink-rgb),0.06);
 }
 
 .nav-logo {
@@ -117,8 +121,8 @@ body:has(button:hover) .cursor-follower {
 .nav-links {
   display: flex;
   gap: 0.5rem;
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(var(--ink-rgb),0.06);
+  border: 1px solid rgba(var(--ink-rgb),0.08);
   border-radius: 100px;
   padding: 0.5rem 0.8rem;
 }
@@ -133,7 +137,7 @@ body:has(button:hover) .cursor-follower {
 }
 
 .nav-link:hover {
-  background: rgba(255,255,255,0.1);
+  background: rgba(var(--ink-rgb),0.1);
   color: var(--white);
 }
 
@@ -144,7 +148,7 @@ body:has(button:hover) .cursor-follower {
 
 .social-pill {
   padding: 0.45rem 0.8rem;
-  border: 1px solid rgba(255,255,255,0.15);
+  border: 1px solid rgba(var(--ink-rgb),0.15);
   border-radius: 100px;
   font-size: 0.75rem;
   font-weight: 600;
@@ -250,7 +254,7 @@ body:has(button:hover) .cursor-follower {
 .image-glow {
   position: absolute;
   inset: -20px;
-  background: radial-gradient(ellipse at center, rgba(255,77,171,0.08) 0%, transparent 70%);
+  background: radial-gradient(ellipse at center, rgba(var(--accent-rgb),0.08) 0%, transparent 70%);
   border-radius: inherit;
   pointer-events: none;
 }
@@ -258,9 +262,9 @@ body:has(button:hover) .cursor-follower {
 /* Floating badges */
 .floating-badge {
   position: absolute;
-  background: rgba(255,255,255,0.08);
+  background: rgba(var(--ink-rgb),0.08);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(255,255,255,0.12);
+  border: 1px solid rgba(var(--ink-rgb),0.12);
   border-radius: 100px;
   padding: 0.5rem 1rem;
   font-size: 0.8rem;
@@ -290,8 +294,8 @@ body:has(button:hover) .cursor-follower {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  background: rgba(255,77,171,0.1);
-  border: 1px solid rgba(255,77,171,0.25);
+  background: rgba(var(--accent-rgb),0.1);
+  border: 1px solid rgba(var(--accent-rgb),0.25);
   color: var(--accent);
   border-radius: 100px;
   padding: 0.4rem 1rem;
@@ -336,7 +340,7 @@ body:has(button:hover) .cursor-follower {
 .hero-links {
   display: flex;
   flex-direction: column;
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid rgba(var(--ink-rgb),0.1);
   border-radius: var(--radius);
   overflow: hidden;
   opacity: 0;
@@ -349,7 +353,7 @@ body:has(button:hover) .cursor-follower {
   align-items: center;
   justify-content: space-between;
   padding: 1rem 1.4rem;
-  border-bottom: 1px solid rgba(255,255,255,0.07);
+  border-bottom: 1px solid rgba(var(--ink-rgb),0.07);
   transition: background var(--transition);
   position: relative;
   overflow: hidden;
@@ -361,7 +365,7 @@ body:has(button:hover) .cursor-follower {
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(255,255,255,0.04);
+  background: rgba(var(--ink-rgb),0.04);
   transform: translateX(-100%);
   transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
@@ -376,8 +380,8 @@ body:has(button:hover) .cursor-follower {
 .link-btn {
   font-size: 0.8rem;
   font-weight: 600;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(var(--ink-rgb),0.08);
+  border: 1px solid rgba(var(--ink-rgb),0.12);
   padding: 0.35rem 0.9rem;
   border-radius: 100px;
   transition: background var(--transition), border-color var(--transition), color var(--transition);
@@ -404,7 +408,7 @@ body:has(button:hover) .cursor-follower {
   font-style: italic;
   font-weight: 900;
   color: transparent;
-  -webkit-text-stroke: 1px rgba(255,255,255,0.08);
+  -webkit-text-stroke: 1px rgba(var(--ink-rgb),0.08);
   white-space: nowrap;
   letter-spacing: -0.02em;
   will-change: transform;
@@ -497,8 +501,8 @@ body:has(button:hover) .cursor-follower {
 }
 
 .chip {
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(var(--ink-rgb),0.05);
+  border: 1px solid rgba(var(--ink-rgb),0.1);
   padding: 0.4rem 1rem;
   border-radius: 100px;
   font-size: 0.8rem;
@@ -518,7 +522,7 @@ body:has(button:hover) .cursor-follower {
    ============================================ */
 .proyectos {
   padding: 5rem 2.5rem 7rem;
-  border-top: 1px solid rgba(255,255,255,0.06);
+  border-top: 1px solid rgba(var(--ink-rgb),0.06);
 }
 
 .proyectos-inner {
@@ -541,7 +545,7 @@ body:has(button:hover) .cursor-follower {
 
 .proy-card {
   background: var(--dark2);
-  border: 1px solid rgba(255,255,255,0.07);
+  border: 1px solid rgba(var(--ink-rgb),0.07);
   border-radius: var(--radius-lg);
   overflow: hidden;
   display: flex;
@@ -551,7 +555,7 @@ body:has(button:hover) .cursor-follower {
 
 .proy-card:hover {
   transform: translateY(-6px);
-  border-color: rgba(255,77,171,0.25);
+  border-color: rgba(var(--accent-rgb),0.25);
   box-shadow: 0 20px 50px rgba(0,0,0,0.4);
 }
 
@@ -564,7 +568,7 @@ body:has(button:hover) .cursor-follower {
 }
 
 .proy-img--placeholder {
-  background: linear-gradient(135deg, #1a1a1a 0%, #222 100%);
+  background: linear-gradient(135deg, var(--dark2) 0%, var(--dark3) 100%);
 }
 
 .proy-img--placeholder::after {
@@ -630,8 +634,8 @@ body:has(button:hover) .cursor-follower {
 .proy-tag {
   font-size: 0.7rem;
   font-weight: 600;
-  background: rgba(255,77,171,0.1);
-  border: 1px solid rgba(255,77,171,0.2);
+  background: rgba(var(--accent-rgb),0.1);
+  border: 1px solid rgba(var(--accent-rgb),0.2);
   color: var(--accent);
   padding: 0.2rem 0.65rem;
   border-radius: 100px;
@@ -667,14 +671,14 @@ body:has(button:hover) .cursor-follower {
   font-weight: 600;
   padding: 0.45rem 1rem;
   border-radius: 100px;
-  border: 1px solid rgba(255,255,255,0.12);
+  border: 1px solid rgba(var(--ink-rgb),0.12);
   color: var(--white2);
   transition: background var(--transition), border-color var(--transition), color var(--transition);
 }
 
 .proy-link:hover {
-  background: rgba(255,255,255,0.08);
-  border-color: rgba(255,255,255,0.2);
+  background: rgba(var(--ink-rgb),0.08);
+  border-color: rgba(var(--ink-rgb),0.2);
 }
 
 .proy-link--primary {
@@ -695,7 +699,7 @@ body:has(button:hover) .cursor-follower {
 .contacto {
   padding: 5rem 2.5rem 7rem;
   background: var(--dark);
-  border-top: 1px solid rgba(255,255,255,0.06);
+  border-top: 1px solid rgba(var(--ink-rgb),0.06);
 }
 
 .contacto-inner {
@@ -728,7 +732,7 @@ body:has(button:hover) .cursor-follower {
   font-size: 0.9rem;
   font-weight: 600;
   padding: 0.6rem 1.3rem;
-  border: 1px solid rgba(255,255,255,0.12);
+  border: 1px solid rgba(var(--ink-rgb),0.12);
   border-radius: 100px;
   color: var(--white2);
   transition: background var(--transition), border-color var(--transition), color var(--transition);
@@ -745,7 +749,7 @@ body:has(button:hover) .cursor-follower {
    ============================================ */
 .footer {
   padding: 3rem 2.5rem 0;
-  border-top: 1px solid rgba(255,255,255,0.06);
+  border-top: 1px solid rgba(var(--ink-rgb),0.06);
   overflow: hidden;
 }
 
@@ -787,7 +791,7 @@ body:has(button:hover) .cursor-follower {
   font-size: clamp(4rem, 10vw, 10rem);
   font-weight: 900;
   color: transparent;
-  -webkit-text-stroke: 1px rgba(255,255,255,0.04);
+  -webkit-text-stroke: 1px rgba(var(--ink-rgb),0.04);
   line-height: 1;
   text-align: center;
   letter-spacing: -0.03em;

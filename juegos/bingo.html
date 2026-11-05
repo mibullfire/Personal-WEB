@@ -132,7 +132,7 @@
 
     /* ── Bingo! ── */
     .bingo-overlay {
-      display: none; position: fixed; inset: 0; background: rgba(0,0,0,.85);
+      display: none; position: fixed; inset: 0; background: rgba(var(--black-rgb),.9);
       z-index: 200; align-items: center; justify-content: center;
       flex-direction: column; gap: 1.5rem;
     }
@@ -158,6 +158,8 @@
   </style>
   <link rel="stylesheet" href="../tema-flow.css" />
   <script src="../js/tema-flow.js" defer></script>
+  <link rel="stylesheet" href="../modo.css" />
+  <script src="../js/modo.js"></script>
 </head>
 <body>
   <div class="cursor" id="cursor"></div>

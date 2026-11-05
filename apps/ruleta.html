@@ -306,6 +306,8 @@
   </style>
   <link rel="stylesheet" href="../tema-flow.css" />
   <script src="../js/tema-flow.js" defer></script>
+  <link rel="stylesheet" href="../modo.css" />
+  <script src="../js/modo.js"></script>
 </head>
 <body>
 
@@ -403,12 +405,18 @@
     /* ── Palette ── */
     const tema = getComputedStyle(document.documentElement);
     const cssVar = name => tema.getPropertyValue(name).trim();
-    const ACCENT_RGB = cssVar('--accent-rgb');
+    let ACCENT_RGB = cssVar('--accent-rgb');
     const PALETTE = [
       cssVar('--accent'), '#a855f7', '#3b82f6', '#06b6d4',
       '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
       '#0ea5e9', '#84cc16', '#f97316', '#e879f9',
     ];
+
+    window.addEventListener('modo-cambiado', () => {
+      ACCENT_RGB = cssVar('--accent-rgb');
+      PALETTE[0] = cssVar('--accent');
+      draw();
+    });
 
     /* ── Canvas setup ── */
     const canvas = document.getElementById('wheel');
@@ -445,7 +453,7 @@
       ctx.shadowBlur = 24;
       ctx.beginPath();
       ctx.arc(0, 0, R + 2, 0, 2 * Math.PI);
-      ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+      ctx.strokeStyle = `rgba(${cssVar('--ink-rgb')},0.06)`;
       ctx.lineWidth = 2;
       ctx.stroke();
       ctx.restore();
@@ -521,7 +529,7 @@
       ctx.arc(0, 0, R, 0, 2 * Math.PI);
       ctx.fillStyle = cssVar('--dark2');
       ctx.fill();
-      ctx.strokeStyle = 'rgba(255,255,255,0.07)';
+      ctx.strokeStyle = `rgba(${cssVar('--ink-rgb')},0.07)`;
       ctx.lineWidth = 2;
       ctx.stroke();
       ctx.fillStyle = cssVar('--gray2');

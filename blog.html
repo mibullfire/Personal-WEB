@@ -6,6 +6,8 @@
   <title>mibullfire's blog ~ ✦</title>
   <link rel="icon" type="image/png" href="img/web-icon.png" />
   <link rel="stylesheet" href="blog.css" />
+  <link rel="stylesheet" href="modo.css" />
+  <script src="js/modo.js"></script>
 </head>
 <body>
 
@@ -200,7 +202,7 @@
         if (s.o <= 0 || s.o >= 1) s.do *= -1;
         ctx.beginPath();
         ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(200,170,255,${s.o * 0.7})`;
+        ctx.fillStyle = `rgba(${document.documentElement.dataset.modo === 'claro' ? '123,47,255' : '200,170,255'},${s.o * 0.7})`;
         ctx.fill();
       }
       requestAnimationFrame(draw);
