@@ -1,0 +1,111 @@
+/* Pantallas de final del ajedrez: victoria (rey y confeti) y derrota (bufón). */
+.final {
+  position: fixed;
+  top: 0; right: 0; bottom: 0; left: 0;
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow-y: auto;
+  padding: 1rem;
+  animation: finalEntrar .45s ease-out;
+}
+
+.final--victoria { background: radial-gradient(ellipse at 50% 40%, rgba(96,58,6,.94) 0%, rgba(20,11,4,.97) 75%); }
+.final--derrota { background: radial-gradient(ellipse at 50% 40%, rgba(58,16,84,.94) 0%, rgba(10,4,16,.98) 75%); }
+
+.final-confeti { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
+
+.final-caja {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 460px;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.final-escena { display: block; width: auto; max-width: 100%; height: min(50vh, 360px); min-height: 170px; overflow: visible; animation: finalEscena .7s cubic-bezier(.2,1.5,.4,1) both; }
+
+/* Pergamino */
+.final-pergamino {
+  width: 100%;
+  margin-top: -.6rem;
+  padding: .9rem 1.4rem 1rem;
+  background: linear-gradient(180deg, #f1dfae 0%, #e6cd8e 55%, #d3b46f 100%);
+  border: 2px solid #7a5526;
+  border-radius: 6px;
+  outline: 1px solid #7a5526;
+  outline-offset: -7px;
+  box-shadow: 0 16px 36px rgba(0,0,0,.55);
+  color: #3a2410;
+  font-family: 'MedievalSharp', 'Times New Roman', Georgia, serif;
+  animation: finalPergamino .55s .2s cubic-bezier(.2,1.2,.4,1) both;
+}
+
+.final-titulo { font-size: clamp(1.9rem, 7vw, 2.7rem); font-weight: 400; line-height: 1.1; color: #7d1420; }
+.final-lema { margin-top: .2rem; font-size: 1.05rem; }
+.final-motivo { margin-top: .15rem; font-size: .9rem; opacity: .75; }
+
+.final-botones { display: flex; flex-wrap: wrap; justify-content: center; gap: .6rem; margin-top: .85rem; }
+
+.final-boton {
+  padding: .55rem 1.2rem;
+  background: #7d1420;
+  color: #f8e8bd;
+  border: 2px solid #4b0b13;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 1rem;
+  transition: transform .15s, background .2s;
+}
+
+.final-boton:hover { background: #9c1b2b; transform: translateY(-2px); }
+.final-boton:focus-visible { outline: 2px solid #3a2410; outline-offset: 2px; }
+.final-boton--sec { background: transparent; color: #3a2410; border-color: #7a5526; }
+.final-boton--sec:hover { background: rgba(122,85,38,.18); }
+
+/* Rey */
+.rey-rayos { transform-origin: 180px 170px; animation: girar 40s linear infinite; }
+.rey-figura { transform-origin: 180px 372px; animation: reyRespira 2.6s ease-in-out infinite; }
+.rey-espada { transform-origin: 262px 170px; animation: reyEspada 1.8s ease-in-out infinite; }
+.rey-destello { transform-origin: 304px 26px; animation: destello 1.8s ease-in-out infinite; }
+.rey-estandarte { transform-origin: 36px 250px; animation: estandarte 1.4s ease-in-out infinite alternate; }
+.rey-estandarte--2 { transform-origin: 324px 250px; animation-delay: -.6s; }
+
+/* Bufón */
+.bufon-figura { transform-origin: 180px 380px; animation: bufonRisa .42s ease-in-out infinite alternate; }
+.bufon-cabeza { transform-origin: 180px 240px; animation: bufonCabeza .84s ease-in-out infinite alternate; }
+.bufon-boca { transform-origin: 180px 172px; animation: bufonBoca .21s ease-in-out infinite alternate; }
+.bufon-cuerno { transform-origin: 180px 118px; animation: bufonCuerno .42s ease-in-out infinite alternate; }
+.bufon-cuerno--der { animation-direction: alternate-reverse; }
+.bufon-dedo { transform-origin: 250px 292px; animation: bufonDedo .42s ease-in-out infinite alternate; }
+.bufon-lagrima { animation: lagrima 1s ease-in infinite; }
+.bufon-lagrima--2 { animation-delay: .5s; }
+.bufon-ja { font-family: 'MedievalSharp', 'Times New Roman', serif; fill: #ffd84d; stroke: #3b0f55; stroke-width: 1.2px; paint-order: stroke; opacity: 0; animation: bufonJa 1.8s ease-out infinite; }
+.bufon-ja--2 { animation-delay: .6s; }
+.bufon-ja--3 { animation-delay: 1.2s; }
+
+@keyframes finalEntrar { from { opacity: 0; } to { opacity: 1; } }
+@keyframes finalEscena { from { opacity: 0; transform: translateY(40px) scale(.75); } to { opacity: 1; transform: none; } }
+@keyframes finalPergamino { from { opacity: 0; transform: scaleY(.1); } to { opacity: 1; transform: none; } }
+@keyframes girar { to { transform: rotate(360deg); } }
+@keyframes reyRespira { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+@keyframes reyEspada { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(5deg); } }
+@keyframes destello { 0%, 100% { transform: scale(.5); opacity: .5; } 50% { transform: scale(1.15) rotate(25deg); opacity: 1; } }
+@keyframes estandarte { from { transform: skewY(-5deg); } to { transform: skewY(5deg); } }
+@keyframes bufonRisa { from { transform: translateY(0) rotate(-1.8deg); } to { transform: translateY(-7px) rotate(1.8deg); } }
+@keyframes bufonCabeza { from { transform: rotate(-5deg); } to { transform: rotate(6deg); } }
+@keyframes bufonBoca { from { transform: scaleY(.84); } to { transform: scaleY(1.08); } }
+@keyframes bufonCuerno { from { transform: rotate(-3deg); } to { transform: rotate(4deg); } }
+@keyframes bufonDedo { from { transform: rotate(-5deg); } to { transform: rotate(5deg); } }
+@keyframes lagrima { from { transform: translateY(0); opacity: 1; } to { transform: translateY(34px); opacity: 0; } }
+@keyframes bufonJa { 0% { opacity: 0; transform: translateY(14px) scale(.7); } 25% { opacity: 1; } 100% { opacity: 0; transform: translateY(-34px) scale(1.15); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .final, .final * { animation: none !important; }
+  .bufon-ja { opacity: 1; }
+}

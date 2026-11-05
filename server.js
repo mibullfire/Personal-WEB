@@ -2,6 +2,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const api = require('./lib/api');
+const ajedrez = require('./lib/ajedrez-salas');
 const db = require('./lib/db');
 
 const PORT = process.env.PORT || 3000;
@@ -122,6 +123,9 @@ const server = http.createServer(async (req, res) => {
   if (pathname.includes('\0')) {
     return send(res, 400, 'Bad Request', { 'Content-Type': 'text/plain; charset=utf-8' });
   }
+
+  // Ajedrez online: va antes que la API del blog porque no necesita base de datos.
+  if (await ajedrez.handle(req, res, pathname, url.searchParams)) return;
 
   // API del blog y fotos subidas (GET, POST y DELETE).
   if (await api.handle(req, res, pathname, url.searchParams)) return;
