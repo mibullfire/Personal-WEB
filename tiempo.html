@@ -178,6 +178,27 @@
     .aire-gases div { text-align: center; background: rgba(255,255,255,.35); border-radius: 18px; padding: .5rem; }
     body.kw-noche .aire-gases div { background: rgba(255,255,255,.08); }
     .aire-gases small { display: block; color: var(--ink2); }
+    /* Comparativa con estilo kawaii */
+    #vista-comparar .cmp-tit { margin-bottom: .2rem; }
+    #vista-comparar .kw-sub { margin-bottom: 1.2rem; }
+    #vista-comparar .panel { margin-bottom: 1rem; padding: 1rem 1.3rem; }
+    #vista-comparar .cmp-h { margin: 0 0 .6rem; font-size: 1.15rem; }
+    #vista-comparar input[type=search], #vista-comparar input[type=date] { background: var(--card); border: 2px solid var(--card-b); border-radius: 99px; padding: .5rem 1.1rem; color: var(--ink); font-weight: 700; }
+    #vista-comparar input:focus { outline: none; border-color: var(--pop); }
+    #vista-comparar .resultados button, #vista-comparar .chip { background: var(--card); border: 2px solid var(--card-b); color: var(--ink); font-weight: 700; }
+    #vista-comparar .resultados button { border-radius: 18px; padding: .5rem 1rem; }
+    #vista-comparar .resultados button:hover { border-color: var(--pop); }
+    #vista-comparar .chip button { color: var(--ink2); background: transparent; border: none; }
+    #vista-comparar .cols input { accent-color: var(--pop); }
+    #vista-comparar .metrica { background: var(--card); border: 2px solid var(--card-b); border-radius: 22px; backdrop-filter: blur(12px); color: var(--ink); }
+    #vista-comparar .metrica small, #vista-comparar .estado, #vista-comparar .sub { color: var(--ink2); }
+    #vista-comparar .metrica strong { font-family: 'Fredoka', sans-serif; }
+    #vista-comparar .estado.error, #vista-comparar .error { color: #d6336c; }
+    #vista-comparar .tabla-wrap { padding: 0; overflow-x: auto; }
+    #vista-comparar th { background: rgba(255,255,255,.45); color: var(--ink); font-family: 'Fredoka', sans-serif; }
+    body.kw-noche #vista-comparar th { background: rgba(255,255,255,.1); }
+    #vista-comparar th, #vista-comparar td { border-bottom: 2px dashed rgba(150,130,200,.25); }
+    #vista-comparar .kw-btn { margin: 0; }
     @media (prefers-reduced-motion: reduce) { .kw *, .kw { animation: none !important; } }
 
   </style>
@@ -264,42 +285,42 @@
   <p class="kw-pie">Datos: <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo.com</a> (CC BY 4.0) ♡</p>
 </section>
 
-<section id="vista-comparar" hidden>
+<section id="vista-comparar" class="kw" hidden>
   <button class="volver cmp" data-ir="">← Volver</button>
-  <h1>🌦️ El tiempo · <span id="tituloFecha"></span></h1>
-  <p class="sub" id="fuente"></p>
+  <h1 class="kw-titulo cmp-tit">🌦️ El tiempo · <span id="tituloFecha"></span></h1>
+  <p class="sub kw-sub" id="fuente"></p>
 
-  <div class="panel">
-    <h2>📅 Fecha</h2>
+  <div class="panel kw-card">
+    <h2 class="kw-h cmp-h">📅 Fecha</h2>
     <div class="row">
-      <button data-dias="0">Hoy</button>
-      <button data-dias="1">Mañana</button>
-      <button data-dias="2">Pasado mañana</button>
+      <button class="kw-btn" data-dias="0">Hoy</button>
+      <button class="kw-btn" data-dias="1">Mañana</button>
+      <button class="kw-btn" data-dias="2">Pasado mañana</button>
       <input type="date" id="fecha" />
     </div>
   </div>
 
-  <div class="panel">
-    <h2>📍 Localizaciones</h2>
+  <div class="panel kw-card">
+    <h2 class="kw-h cmp-h">📍 Localizaciones</h2>
     <div class="row">
       <input type="search" id="buscar" placeholder="Buscar: Toledo, Oviedo, París…" />
-      <button id="btnBuscar">Buscar</button>
+      <button id="btnBuscar" class="kw-btn">Buscar</button>
     </div>
     <div class="resultados" id="resultados"></div>
     <div class="chips" id="chips"></div>
   </div>
 
-  <div class="panel">
-    <h2>🧾 Columnas</h2>
+  <div class="panel kw-card">
+    <h2 class="kw-h cmp-h">🧾 Columnas</h2>
     <div class="cols" id="cols"></div>
   </div>
 
   <div class="metricas" id="metricas"></div>
   <div class="estado" id="estado"></div>
-  <div class="tabla-wrap"><table id="tabla"></table></div>
-  <div class="row" style="margin-top:.8rem"><button id="btnCsv">⬇️ CSV</button></div>
+  <div class="tabla-wrap kw-card"><table id="tabla"></table></div>
+  <div class="row" style="margin-top:.8rem"><button id="btnCsv" class="kw-btn">⬇️ CSV</button></div>
 
-  <footer>Datos meteorológicos: <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo.com</a> (CC BY 4.0)</footer>
+  <footer class="kw-pie">Datos meteorológicos: <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo.com</a> (CC BY 4.0)</footer>
 </section>
 </main>
 
@@ -966,9 +987,9 @@ function ruta() {
   document.getElementById('vista-inicio').hidden = vista !== '';
   document.getElementById('vista-ver').hidden = vista !== 'ver';
   document.getElementById('vista-comparar').hidden = vista !== 'comparar';
-  document.body.classList.toggle('vista-kw', vista !== 'comparar');
-  if (vista === 'comparar') { document.body.classList.remove('kw-noche'); if (!cmpListo) { cmpListo = true; cargar(); } }
-  else document.body.classList.toggle('kw-noche', !escena.dia);
+  document.body.classList.add('vista-kw');
+  document.body.classList.toggle('kw-noche', !escena.dia);
+  if (vista === 'comparar' && !cmpListo) { cmpListo = true; cargar(); }
   if (vista === 'ver' && !cargado) { cargado = true; chips(); ver(lugar); }
   scrollTo(0, 0);
 }
