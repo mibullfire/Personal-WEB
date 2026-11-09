@@ -837,7 +837,7 @@ async function ver(l) {
     const [p, a] = await Promise.all([
       pedir(URL_PREV, { ...base, forecast_days: 8, wind_speed_unit: 'kmh',
         current: 'temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,cloud_cover,pressure_msl,wind_speed_10m,wind_direction_10m,wind_gusts_10m,dew_point_2m,visibility,uv_index',
-        hourly: 'temperature_2m,precipitation_probability,weather_code,is_day',
+        hourly: 'temperature_2m,apparent_temperature,precipitation_probability,weather_code,is_day',
         daily: 'weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_probability_max,precipitation_sum,uv_index_max,wind_speed_10m_max' }),
       pedir(URL_AIRE, { ...base, current: 'european_aqi,pm2_5,pm10,ozone,nitrogen_dioxide,sulphur_dioxide' }).catch(() => null),
     ]);
@@ -869,15 +869,26 @@ function pintar(l, p, a) {
   const pp = d.precipitation_probability_max[0] ?? 0;
   if (['nieve'].includes(tipo)) cs.push(['⛄', 'Botas y guantes: ¡hay nieve!']);
   else if (pp >= 50 || ['lluvia', 'tormenta'].includes(tipo)) cs.push(['☂️', `Lleva paraguas (${pp}% de lluvia hoy)`]);
-  else if (pp >= 25) cs.push(['🌂', `Por si acaso, paraguas pequeñito (${pp}%)`]);
-  const ap = c.apparent_temperature;
-  cs.push(ap >= 30 ? ['🩳', 'Ropa fresquita y mucha agua'] : ap >= 20 ? ['👕', 'Con camiseta vas perfecta/o'] : ap >= 12 ? ['🧥', 'Una chaquetita te vendrá bien'] : ap >= 4 ? ['🧣', 'Abrigo y bufanda, ¡hace frío!'] : ['🥶', 'Abrigo gordito, gorro y guantes']);
+  else if (pp >= 20) cs.push(['🌂', `Por si acaso, paraguas pequeñito (${pp}%)`]);
+  const nRopa0 = cs.length;
+  const prenda = (t) => t >= 30 ? ['🩳', 'ropa fresquita y mucha agua'] : t >= 22 ? ['👕', 'camiseta'] : t >= 18 ? ['🧥', 'chaquetita ligera'] : t >= 12 ? ['🧶', 'chaqueta, sudadera o ambas: hace fresco'] : t >= 4 ? ['🧣', 'abrigo y bufanda'] : ['🥶', 'abrigo grueso, gorro y guantes'];
+  // Por franjas del día (sensación térmica horaria media de hoy)
+  const hoy = c.time.slice(0, 10);
+  const franja = (n, ini, fin) => {
+    const v = h.time.map((x, i) => [x, h.apparent_temperature[i]]).filter(([x, y]) => x.slice(0, 10) === hoy && +x.slice(11, 13) >= ini && +x.slice(11, 13) < fin && y != null).map(x => x[1]);
+    return v.length ? { n, ini, fin, t: v.reduce((a, b) => a + b, 0) / v.length, min: Math.min(...v), max: Math.max(...v) } : null;
+  };
+  const fr3 = [franja('Mañana', 6, 14), franja('Tarde', 14, 21), franja('Noche', 21, 24)].filter(Boolean);
+  const prF = fr3.map(f => ({ ...f, p: prenda(f.t) }));
+  if (prF.length && prF.some(f => f.p[1] !== prF[0].p[1])) prF.forEach(f => cs.push([f.p[0], `${f.n} (${f.ini}–${f.fin}h, ${Math.round(f.min)}° a ${Math.round(f.max)}°): ${f.p[1]}`]));
+  else { const x = prenda(prF.length ? prF[0].t : c.apparent_temperature); cs.push([x[0], 'Todo el día: ' + x[1]]); }
+  const nRopa1 = cs.length;
   const uv = Math.max(d.uv_index_max[0] ?? 0, c.uv_index ?? 0);
   if (uv >= 3 && dia) cs.push(['🧴', `Crema solar (UV máx ${uv.toFixed(1)})`]);
   if (c.wind_gusts_10m >= 50) cs.push(['🌬️', `Rachas de ${Math.round(c.wind_gusts_10m)} km/h: ¡sujeta el gorro!`]);
   if (a?.current?.european_aqi > 60) cs.push(['😷', 'Aire regular: mejor evita esfuerzos fuertes']);
   if ((c.visibility ?? 99999) < 1000) cs.push(['🚗', 'Poca visibilidad: precaución al conducir']);
-  if (!cs.some(x => x[0] !== '🧥' && x[0] !== '👕')) cs.push(['🌈', '¡Sin avisos! Que tengas un día precioso']);
+  if (nRopa0 === 0 && cs.length === nRopa1) cs.push(['🌈', '¡Sin avisos! Que tengas un día precioso']);
   $('vConsejos').innerHTML = cs.map(([e, tx]) => `<div class="consejo"><span>${e}</span>${esc(tx)}</div>`).join('');
 
   // Horas
