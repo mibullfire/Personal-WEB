@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="es" data-tema="apps">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>El tiempo por localidades</title>
+  <link rel="icon" type="image/png" href="img/web-icon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="tema-flow.css" />
+  <script src="js/tema-flow.js" defer></script>
+  <link rel="stylesheet" href="modo.css" />
+  <script src="js/modo.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--black); color: var(--white); font-family: var(--xb-font); min-height: 100vh; }
+    main { max-width: 1400px; margin: 0 auto; padding: 2rem 1.25rem 4rem; position: relative; z-index: 1; }
+    h1 { font-size: clamp(1.5rem, 4vw, 2.2rem); font-weight: 800; margin-bottom: .25rem; }
+    h2 { font-size: 1rem; font-weight: 700; margin-bottom: .6rem; }
+    .sub { color: var(--gray); font-size: .9rem; margin-bottom: 1.5rem; }
+    .panel { background: var(--dark); border: 1px solid var(--dark3); border-radius: 14px; padding: 1rem 1.1rem; margin-bottom: 1rem; }
+    .row { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
+    input, select, button { font: inherit; color: var(--white); background: var(--dark2); border: 1px solid var(--dark3); border-radius: 8px; padding: .45rem .7rem; }
+    button { cursor: pointer; }
+    button:hover { border-color: var(--accent); }
+    button.primary { background: var(--accent); color: var(--black); border-color: var(--accent); font-weight: 700; }
+    .chips { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .7rem; }
+    .chip { display: inline-flex; gap: .4rem; align-items: center; background: var(--dark2); border: 1px solid var(--dark3); border-radius: 99px; padding: .2rem .3rem .2rem .75rem; font-size: .85rem; }
+    .chip button { border: none; background: transparent; padding: 0 .4rem; color: var(--gray); }
+    .resultados { margin-top: .6rem; display: grid; gap: .3rem; }
+    .resultados button { text-align: left; }
+    .metricas { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: .75rem; margin-bottom: 1rem; }
+    .metrica { background: var(--dark); border: 1px solid var(--dark3); border-radius: 14px; padding: .8rem 1rem; }
+    .metrica small { color: var(--gray); display: block; }
+    .metrica strong { font-size: 1.4rem; }
+    .tabla-wrap { overflow-x: auto; border: 1px solid var(--dark3); border-radius: 14px; background: var(--dark); }
+    table { border-collapse: collapse; width: 100%; font-size: .88rem; white-space: nowrap; }
+    th, td { padding: .5rem .75rem; text-align: right; border-bottom: 1px solid var(--dark3); }
+    th { position: sticky; top: 0; background: var(--dark2); cursor: pointer; user-select: none; }
+    th:first-child, td:first-child, td.txt, th.txt { text-align: left; }
+    td:first-child { font-weight: 700; }
+    .estado { color: var(--gray); font-size: .85rem; margin: .6rem 0; }
+    .error { color: #ff6b6b; }
+    .cols { display: flex; flex-wrap: wrap; gap: .3rem 1rem; font-size: .85rem; }
+    .cols label { display: flex; gap: .3rem; align-items: center; }
+    .cols input { padding: 0; }
+    footer { color: var(--gray); font-size: .8rem; margin-top: 1.5rem; }
+    footer a { color: var(--accent); }
+  </style>
+</head>
+<body>
+<main>
+  <h1>🌦️ El tiempo · <span id="tituloFecha"></span></h1>
+  <p class="sub" id="fuente"></p>
+
+  <div class="panel">
+    <h2>📅 Fecha</h2>
+    <div class="row">
+      <button data-dias="0">Hoy</button>
+      <button data-dias="1">Mañana</button>
+      <button data-dias="2">Pasado mañana</button>
+      <input type="date" id="fecha" />
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>📍 Localizaciones</h2>
+    <div class="row">
+      <input type="search" id="buscar" placeholder="Buscar: Toledo, Oviedo, París…" />
+      <button id="btnBuscar">Buscar</button>
+    </div>
+    <div class="resultados" id="resultados"></div>
+    <div class="chips" id="chips"></div>
+  </div>
+
+  <div class="panel">
+    <h2>🧾 Columnas</h2>
+    <div class="cols" id="cols"></div>
+  </div>
+
+  <div class="metricas" id="metricas"></div>
+  <div class="estado" id="estado"></div>
+  <div class="tabla-wrap"><table id="tabla"></table></div>
+  <div class="row" style="margin-top:.8rem"><button id="btnCsv">⬇️ CSV</button></div>
+
+  <footer>Datos meteorológicos: <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo.com</a> (CC BY 4.0)</footer>
+</main>
+
+<script>
+const URL_PREV = 'https://api.open-meteo.com/v1/forecast';
+const URL_HIST = 'https://archive-api.open-meteo.com/v1/archive';
+const URL_GEO = 'https://geocoding-api.open-meteo.com/v1/search';
+const DIAS_PASADOS = 92, DIAS_FUTUROS = 15, FECHA_MIN = '1940-01-01';
+
+const WMO = {0:['☀️','Despejado'],1:['🌤️','Mayormente despejado'],2:['⛅','Parcialmente nuboso'],3:['☁️','Cubierto'],45:['🌫️','Niebla'],48:['🌫️','Niebla con escarcha'],51:['🌦️','Llovizna débil'],53:['🌦️','Llovizna moderada'],55:['🌦️','Llovizna intensa'],56:['🌧️','Llovizna helada débil'],57:['🌧️','Llovizna helada intensa'],61:['🌧️','Lluvia débil'],63:['🌧️','Lluvia moderada'],65:['🌧️','Lluvia intensa'],66:['🌧️','Lluvia helada débil'],67:['🌧️','Lluvia helada intensa'],71:['🌨️','Nevada débil'],73:['🌨️','Nevada moderada'],75:['❄️','Nevada intensa'],77:['🌨️','Granos de nieve'],80:['🌦️','Chubascos débiles'],81:['🌧️','Chubascos moderados'],82:['⛈️','Chubascos violentos'],85:['🌨️','Chubascos de nieve débiles'],86:['❄️','Chubascos de nieve intensos'],95:['⛈️','Tormenta'],96:['⛈️','Tormenta con granizo débil'],99:['⛈️','Tormenta con granizo fuerte']};
+const CARD = ['N','NE','E','SE','S','SO','O','NO'], FLECHAS = ['↓','↙','←','↖','↑','↗','→','↘'];
+
+const hora = (iso) => iso ? iso.slice(11, 16) : '—';
+const dir = (g) => { if (g == null) return '—'; const i = Math.round(g / 45) % 8; return FLECHAS[i] + ' ' + CARD[i]; };
+const estadoWmo = (c) => { if (c == null) return '—'; const w = WMO[c] || ['❔', 'Código ' + c]; return w[0] + ' ' + w[1]; };
+
+// key, título, extractor(daily) -> valor, texto?
+const COLUMNAS = [
+  ['estado', 'Estado', d => estadoWmo(d.weather_code), true],
+  ['tmax', 'T. máx (°C)', d => d.temperature_2m_max],
+  ['tmin', 'T. mín (°C)', d => d.temperature_2m_min],
+  ['smax', 'Sensación máx (°C)', d => d.apparent_temperature_max],
+  ['smin', 'Sensación mín (°C)', d => d.apparent_temperature_min],
+  ['prob', 'Prob. precipitación (%)', d => d.precipitation_probability_max],
+  ['prec', 'Precipitación (mm)', d => d.precipitation_sum],
+  ['lluvia', 'Lluvia (mm)', d => d.rain_sum],
+  ['nieve', 'Nieve (cm)', d => d.snowfall_sum],
+  ['hprec', 'Horas de precipitación', d => d.precipitation_hours],
+  ['hum', 'Humedad media (%)', d => d.relative_humidity_2m_mean],
+  ['nub', 'Nubosidad media (%)', d => d.cloud_cover_mean],
+  ['viento', 'Viento máx (km/h)', d => d.wind_speed_10m_max],
+  ['rachas', 'Rachas máx (km/h)', d => d.wind_gusts_10m_max],
+  ['dir', 'Dirección viento', d => dir(d.wind_direction_10m_dominant), true],
+  ['uv', 'Índice UV máx', d => d.uv_index_max],
+  ['sol', 'Horas de sol', d => d.sunshine_duration == null ? null : Math.round(d.sunshine_duration / 360) / 10],
+  ['amanecer', 'Amanecer', d => hora(d.sunrise), true],
+  ['atardecer', 'Atardecer', d => hora(d.sunset), true],
+];
+const VARS_COMUNES = ['weather_code','temperature_2m_max','temperature_2m_min','apparent_temperature_max','apparent_temperature_min','precipitation_sum','rain_sum','snowfall_sum','precipitation_hours','relative_humidity_2m_mean','cloud_cover_mean','wind_speed_10m_max','wind_gusts_10m_max','wind_direction_10m_dominant','sunshine_duration','sunrise','sunset'];
+const VARS_PREV = ['precipitation_probability_max', 'uv_index_max'];
+
+const $ = (id) => document.getElementById(id);
+const LS = (k, def) => { try { return JSON.parse(localStorage.getItem(k)) ?? def; } catch { return def; } };
+
+let locs = LS('tiempo.locs', [
+  { nombre: 'Sevilla', latitud: 37.3828, longitud: -5.9732 },
+  { nombre: 'Jerez de la Frontera', latitud: 36.68645, longitud: -6.13606 },
+]);
+let visibles = new Set(LS('tiempo.cols', COLUMNAS.map(c => c[0])));
+let filas = [], orden = null, ordenAsc = true, fuenteTxt = '';
+
+const iso = (d) => { const z = new Date(d.getTime() - d.getTimezoneOffset() * 60000); return z.toISOString().slice(0, 10); };
+const sumaDias = (n) => { const d = new Date(); d.setDate(d.getDate() + n); return d; };
+const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+function fuenteDe(fecha) {
+  return fecha >= iso(sumaDias(-DIAS_PASADOS)) ? 'prevision' : 'historico';
+}
+
+async function pedir(url, params) {
+  const r = await fetch(url + '?' + new URLSearchParams(params));
+  if (!r.ok) {
+    let motivo = ''; try { motivo = (await r.json()).reason; } catch {}
+    throw new Error(`Open-Meteo respondió ${r.status}: ${motivo}`);
+  }
+  return r.json();
+}
+
+async function cargar() {
+  const fecha = $('fecha').value;
+  if (!fecha) return;
+  const [y, m, d] = fecha.split('-');
+  const larga = new Date(+y, +m - 1, +d).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  $('tituloFecha').textContent = larga;
+  const hist = fuenteDe(fecha) === 'historico';
+  fuenteTxt = hist ? 'Histórico Open-Meteo (reanálisis ERA5)' : 'Previsión Open-Meteo';
+  $('fuente').textContent = `${fuenteTxt} · ${locs.length} localizaciones`;
+  if (!locs.length) { filas = []; render(); $('estado').textContent = 'Añade al menos una localización.'; return; }
+
+  $('estado').className = 'estado'; $('estado').textContent = 'Consultando Open-Meteo…';
+  try {
+    const datos = await pedir(hist ? URL_HIST : URL_PREV, {
+      latitude: locs.map(l => l.latitud.toFixed(4)).join(','),
+      longitude: locs.map(l => l.longitud.toFixed(4)).join(','),
+      daily: (hist ? VARS_COMUNES : VARS_COMUNES.concat(VARS_PREV)).join(','),
+      timezone: 'auto', start_date: fecha, end_date: fecha, wind_speed_unit: 'kmh',
+    });
+    const lista = Array.isArray(datos) ? datos : [datos];
+    filas = locs.map((l, i) => {
+      const daily = {};
+      for (const [k, v] of Object.entries(lista[i]?.daily || {})) daily[k] = Array.isArray(v) ? v[0] : v;
+      const fila = { Localidad: l.nombre };
+      COLUMNAS.forEach(c => { fila[c[0]] = c[2](daily); });
+      return fila;
+    });
+    $('estado').textContent = hist ? 'En el histórico no hay probabilidad de precipitación ni índice UV (se muestran como —).' : '';
+  } catch (e) {
+    filas = [];
+    $('estado').className = 'estado error'; $('estado').textContent = e.message;
+  }
+  render();
+}
+
+const fmt = (v, c) => v == null || v !== v ? '—' : (typeof v === 'number' ? (Number.isInteger(v) ? v : v.toFixed(1)) : v);
+
+function render() {
+  const cols = COLUMNAS.filter(c => visibles.has(c[0]));
+  let vista = filas.slice();
+  if (orden) vista.sort((a, b) => {
+    const x = a[orden], y = b[orden];
+    if (x == null && y == null) return 0;
+    if (x == null) return 1; if (y == null) return -1;
+    return (x < y ? -1 : x > y ? 1 : 0) * (ordenAsc ? 1 : -1);
+  });
+  $('tabla').innerHTML = '<thead><tr><th class="txt" data-k="Localidad">Localidad</th>' +
+    cols.map(c => `<th data-k="${c[0]}"${c[3] ? ' class="txt"' : ''}>${esc(c[1])}${orden === c[0] ? (ordenAsc ? ' ▲' : ' ▼') : ''}</th>`).join('') +
+    '</tr></thead><tbody>' + vista.map(f => '<tr><td>' + esc(f.Localidad) + '</td>' +
+      cols.map(c => `<td${c[3] ? ' class="txt"' : ''}>${esc(fmt(f[c[0]], c))}</td>`).join('') + '</tr>').join('') + '</tbody>';
+  $('tabla').querySelectorAll('th').forEach(th => th.onclick = () => {
+    ordenAsc = orden === th.dataset.k ? !ordenAsc : true; orden = th.dataset.k; render();
+  });
+
+  const mejor = (k, f, signo) => {
+    const v = filas.filter(r => r[k] != null);
+    return v.length ? v.reduce((a, b) => (b[k] - a[k]) * signo > 0 ? b : a) : null;
+  };
+  const defs = [
+    ['🔥 Máxima más alta', 'tmax', 1, v => v.toFixed(1) + ' °C'],
+    ['🥶 Mínima más baja', 'tmin', -1, v => v.toFixed(1) + ' °C'],
+    ['🌧️ Más precipitación', 'prec', 1, v => v.toFixed(1) + ' mm'],
+    ['💨 Racha más fuerte', 'rachas', 1, v => Math.round(v) + ' km/h'],
+  ];
+  $('metricas').innerHTML = defs.map(([t, k, s, f]) => {
+    const r = mejor(k, null, s);
+    return r ? `<div class="metrica"><small>${t}</small><strong>${f(r[k])}</strong><small>${esc(r.Localidad)}</small></div>` : '';
+  }).join('');
+}
+
+function renderChips() {
+  $('chips').innerHTML = locs.map((l, i) => `<span class="chip">${esc(l.nombre)}<button data-i="${i}" title="Quitar">✕</button></span>`).join('');
+  $('chips').querySelectorAll('button').forEach(b => b.onclick = () => { locs.splice(+b.dataset.i, 1); guardarLocs(); renderChips(); cargar(); });
+}
+function guardarLocs() { localStorage.setItem('tiempo.locs', JSON.stringify(locs)); }
+
+async function buscar() {
+  const q = $('buscar').value.trim();
+  const out = $('resultados');
+  if (q.length < 2) { out.innerHTML = ''; return; }
+  try {
+    const d = await pedir(URL_GEO, { name: q, count: 10, language: 'es', format: 'json' });
+    const res = d.results || [];
+    out.innerHTML = res.length ? '' : '<span class="sub">Sin resultados.</span>';
+    res.forEach(r => {
+      const detalle = [r.admin2 || r.admin1, r.country].filter(Boolean).join(', ');
+      const b = document.createElement('button');
+      b.textContent = `➕ ${r.name}${detalle ? ' (' + detalle + ')' : ''}`;
+      b.onclick = () => {
+        locs.push({ nombre: r.name, latitud: r.latitude, longitud: r.longitude });
+        guardarLocs(); renderChips(); out.innerHTML = ''; $('buscar').value = ''; cargar();
+      };
+      out.appendChild(b);
+    });
+  } catch (e) { out.innerHTML = `<span class="error">${esc(e.message)}</span>`; }
+}
+
+function csv() {
+  const cols = COLUMNAS.filter(c => visibles.has(c[0]));
+  const celda = (v) => { v = v == null ? '' : String(v); return /[",\n;]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
+  const lineas = [['Localidad', ...cols.map(c => c[1])].map(celda).join(',')]
+    .concat(filas.map(f => [f.Localidad, ...cols.map(c => f[c[0]])].map(celda).join(',')));
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['﻿' + lineas.join('\n')], { type: 'text/csv' }));
+  a.download = `tiempo_${$('fecha').value}.csv`; a.click(); URL.revokeObjectURL(a.href);
+}
+
+// Init
+$('fecha').min = FECHA_MIN; $('fecha').max = iso(sumaDias(DIAS_FUTUROS)); $('fecha').value = iso(sumaDias(1));
+$('fecha').onchange = cargar;
+document.querySelectorAll('[data-dias]').forEach(b => b.onclick = () => { $('fecha').value = iso(sumaDias(+b.dataset.dias)); cargar(); });
+$('btnBuscar').onclick = buscar;
+$('buscar').onkeydown = (e) => { if (e.key === 'Enter') buscar(); };
+$('btnCsv').onclick = csv;
+$('cols').innerHTML = COLUMNAS.map(c => `<label><input type="checkbox" data-k="${c[0]}" ${visibles.has(c[0]) ? 'checked' : ''}>${esc(c[1])}</label>`).join('');
+$('cols').querySelectorAll('input').forEach(i => i.onchange = () => {
+  i.checked ? visibles.add(i.dataset.k) : visibles.delete(i.dataset.k);
+  localStorage.setItem('tiempo.cols', JSON.stringify([...visibles])); render();
+});
+renderChips(); cargar();
+</script>
+</body>
+</html>

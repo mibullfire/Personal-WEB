@@ -152,6 +152,12 @@ const server = http.createServer(async (req, res) => {
     return serveFile(req, res, 'escritorio.html', { 'X-Robots-Tag': 'noindex, nofollow' });
   }
 
+  // Tiempo: pagina oculta (sin enlaces desde la web), solo accesible por URL.
+  if (pathname === '/tiempo' || pathname === '/tiempo/' || pathname === '/tiempo.html') {
+    if (blog) return redirect(res, `https://${MAIN_HOST}/tiempo.html`);
+    return serveFile(req, res, 'tiempo.html', { 'X-Robots-Tag': 'noindex, nofollow' });
+  }
+
   if (blog) {
     // En el blog, /blog.html es la home: se canonicaliza a "/".
     if (pathname === '/blog.html') return redirect(res, '/' + url.search);
